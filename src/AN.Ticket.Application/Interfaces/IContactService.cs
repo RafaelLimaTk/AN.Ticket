@@ -11,4 +11,6 @@ public interface IContactService
     Task<bool> DeleteContactsAsync(List<Guid> ids);
     Task<PagedResult<ContactDto>> GetPaginatedContactsAsync(Guid userId, int pageNumber, int pageSize, string searchTerm = "");
     Task<bool> UpdateContactAsync(ContactCreateDto contactCreateDto);
+    Task<(int Total, int Onhold)> GetTotalAndOnholdTicketsAsyn(string contactEmail);
+
 }

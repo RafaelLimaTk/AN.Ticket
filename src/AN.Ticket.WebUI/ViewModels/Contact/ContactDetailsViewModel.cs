@@ -7,4 +7,7 @@ public class ContactDetailsViewModel
     public string Email { get; set; }
     public string Phone { get; set; }
     public string Mobile { get; set; }
+    public string Department{ get; set; }
+    public int? TotalTicketsonHold{get; set; }
+    public int TotalTicketsAtribuied{ get; set; }
 }

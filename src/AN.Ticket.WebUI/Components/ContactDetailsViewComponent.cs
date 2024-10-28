@@ -22,6 +22,7 @@ public class ContactDetailsViewComponent
         }
 
         var contact = await _contactService.GetByIdAsync(contactId);
+        var (totalTicketsAtribuied, totalTicketsonHold) = await _contactService.GetTotalAndOnholdTicketsAsyn(contact.PrimaryEmail);
 
         if (contact is null)
         {
@@ -32,9 +33,12 @@ public class ContactDetailsViewComponent
         {
             Id = contact.Id,
             Name = contact.GetFullName(),
-            Email = contact.PrimaryEmail,
-            Phone = contact.Phone,
-            Mobile = contact.Mobile
+            Email = contact.PrimaryEmail??"",
+            Phone = contact.Phone??"",
+            Mobile = contact.Mobile??"",
+            Department=contact.Department??"",
+            TotalTicketsonHold=totalTicketsonHold,
+            TotalTicketsAtribuied=totalTicketsAtribuied,
         };
 
         return View(viewModel);
