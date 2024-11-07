@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "Criar Ticket";
+    var currentDate = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
 }
 
 @await Component.InvokeAsync("Breadcrumb")
@@ -84,7 +85,8 @@
                         </div>
                         <div class="mb-3">
                             <label asp-for="DueDate" class="form-label">Data de Vencimento</label>
-                            <input asp-for="DueDate" type="datetime-local" class="form-control" />
+                            <input asp-for="DueDate" type="datetime-local" class="form-control" value="@currentDate" />
+                            @Html.ValidationMessageFor(x => x.DueDate)
                             <span asp-validation-for="DueDate" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
