@@ -15,12 +15,28 @@
         border-radius: 50%;
         margin-right: 10px;
     }
+
+    .dropdown-contact {
+        display: block;
+        width: 100%;
+        padding: 0.25rem 1rem;
+        clear: both;
+        font-weight: 400;
+        color: #212529;
+        text-align: inherit;
+        text-decoration: none;
+        white-space: nowrap;
+        background-color: transparent;
+        border: 0;
+    }
 </style>
 
 <div class="user-info ms-3 dropdown">
-    <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="userDropdown"
+        data-bs-toggle="dropdown" aria-expanded="false">
         @{
-            var profilePicture = string.IsNullOrEmpty(Model.ProfilePicture) ? "/img/user-default.webp" : Model.ProfilePicture;
+            var profilePicture = string.IsNullOrEmpty(Model.ProfilePicture) ? "/img/user-default.webp" :
+            Model.ProfilePicture;
         }
         <img src="@profilePicture" alt="User Avatar" style="object-fit:cover;">
         <span class="ms-2">@Model.FullName</span>
@@ -28,7 +44,7 @@
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
         <li>
             <form asp-controller="Account" asp-action="Logout" method="post" asp-antiforgery="true">
-                <button type="submit" class="dropdown-item">Sair</button>
+                <button type="submit" class="dropdown-contact">Sair</button>
             </form>
         </li>
     </ul>
