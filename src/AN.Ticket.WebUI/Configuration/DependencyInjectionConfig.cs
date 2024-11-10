@@ -44,6 +44,7 @@ public static class DependencyInjectionConfig
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<IAssetService, AssetService>();
+        services.AddScoped<IAssetAssignmentService, AssetAssignmentService>();
         #endregion
 
         #region Repositories
@@ -60,6 +61,7 @@ public static class DependencyInjectionConfig
         services.AddScoped<IAttachmentRepository, AttachmentRepository>();
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();
+        services.AddScoped<IAssetAssignmentRepository, AssetAssignmentRepository>();
         #endregion
 
         #region SMTP

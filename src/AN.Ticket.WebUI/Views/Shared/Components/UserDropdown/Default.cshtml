@@ -1,5 +1,10 @@
 ﻿@model AN.Ticket.WebUI.ViewModels.Account.UserDropdownViewModel
 
+@{
+    var uniqueDropdownId = "userDropdown_" + Guid.NewGuid().ToString("N");
+    var logoutButtonId = "logoutButton_" + Guid.NewGuid().ToString("N");
+}
+
 <style>
     .navbar-custom .user-info {
         display: flex;
@@ -15,20 +20,34 @@
         border-radius: 50%;
         margin-right: 10px;
     }
+
+    .logout-button-custom {
+        width: 100%;
+        background: none;
+        border: none;
+        padding: 8px 20px;
+        text-align: left;
+        color: #000;
+    }
+
+        .logout-button-custom:hover {
+            background-color: #f1f1f1;
+            color: #d9534f;
+        }
 </style>
 
 <div class="user-info ms-3 dropdown">
-    <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="@uniqueDropdownId" data-bs-toggle="dropdown" aria-expanded="false">
         @{
             var profilePicture = string.IsNullOrEmpty(Model.ProfilePicture) ? "/img/user-default.webp" : Model.ProfilePicture;
         }
         <img src="@profilePicture" alt="User Avatar" style="object-fit:cover;">
         <span class="ms-2">@Model.FullName</span>
     </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="@uniqueDropdownId">
         <li>
             <form asp-controller="Account" asp-action="Logout" method="post" asp-antiforgery="true">
-                <button type="submit" class="dropdown-item">Sair</button>
+                <button type="submit" id="@logoutButtonId" class="logout-button-custom">Sair</button>
             </form>
         </li>
     </ul>

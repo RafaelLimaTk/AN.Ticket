@@ -1,13 +1,13 @@
 $(document).ready(function () {
     $('#contactSearch').on('input', function () {
         var filter = $(this).val().toLowerCase();
-        $('.dropdown-item').each(function () {
+        $('#contactDropdown .dropdown-item').each(function () {
             var text = $(this).text().toLowerCase();
             $(this).toggle(text.includes(filter));
         });
     });
 
-    $('.dropdown-item').on('click', function (e) {
+    $('#contactDropdown .dropdown-item').on('click', function (e) {
         e.preventDefault();
 
         var selectedContactId = $(this).data('contact-id');

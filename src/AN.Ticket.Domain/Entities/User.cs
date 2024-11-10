@@ -5,7 +5,7 @@ public class User : EntityBase
 {
     public string FullName { get; private set; }
     public string Email { get; private set; }
-    public string ProfilePicture { get; private set; }
+    public string? ProfilePicture { get; private set; }
 
     public ICollection<AssetAssignment> AssetAssignments { get; private set; }
 

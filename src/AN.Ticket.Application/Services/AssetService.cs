@@ -4,6 +4,7 @@ using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Application.Services.Base;
 using AN.Ticket.Domain.Entities;
 using AN.Ticket.Domain.EntityValidations;
+using AN.Ticket.Domain.Enums;
 using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Domain.Interfaces.Base;
 
@@ -11,14 +12,20 @@ namespace AN.Ticket.Application.Services;
 public class AssetService : Service<AssetDto, Asset>, IAssetService
 {
     private readonly IAssetRepository _assetRepository;
+    private readonly IAssetAssignmentRepository _assetAssignmentRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AssetService(
         IRepository<Asset> repository,
-        IAssetRepository assetRepository
+        IAssetRepository assetRepository,
+        IAssetAssignmentRepository assetAssignmentRepository,
+        IUnitOfWork unitOfWork
     )
         : base(repository)
     {
         _assetRepository = assetRepository;
+        _assetAssignmentRepository = assetAssignmentRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<PagedResult<AssetDto>> GetPaginatedAssetsAsync(int pageNumber, int pageSize, string searchTerm = "")
@@ -47,6 +54,107 @@ public class AssetService : Service<AssetDto, Asset>, IAssetService
         };
     }
 
+    public async Task<bool> CreateAssetAsync(AssetDto assetDto)
+    {
+        var asset = new Asset(
+            assetDto.Name,
+            assetDto.SerialNumber,
+            assetDto.AssetType,
+            assetDto.PurchaseDate,
+            assetDto.Value,
+            assetDto.Description
+        );
+
+        AssetAssignment? assetAssignment = null;
+
+        if (assetDto.UserId.HasValue && assetDto.UserId != Guid.Empty)
+        {
+            assetAssignment = assetDto.Type switch
+            {
+                UserContactType.User => new AssetAssignment(asset.Id, assetDto.UserId, null),
+                UserContactType.Contact => new AssetAssignment(asset.Id, null, assetDto.UserId),
+                _ => throw new EntityValidationException("Tipo de usuário ou contato inválido.")
+            };
+        }
+
+        await _assetRepository.SaveAsync(asset);
+
+        await _unitOfWork.CommitAsync();
+
+        if (assetAssignment is not null)
+            await _assetAssignmentRepository.SaveAsync(assetAssignment);
+
+        await _unitOfWork.CommitAsync();
+
+        return true;
+    }
+
+    public async Task<bool> UpdateAssetAsync(AssetDto assetDto)
+    {
+        var asset = await _assetRepository.GetByIdAsync(assetDto.Id);
+
+        if (asset is null)
+            throw new EntityValidationException("Ativo não encontrado.");
+
+        asset.UpdateDetails(
+            assetDto.Name,
+            assetDto.SerialNumber,
+            assetDto.AssetType,
+            assetDto.PurchaseDate,
+            assetDto.Value,
+            assetDto.Description
+        );
+
+        if (assetDto.UserId.HasValue && assetDto.UserId != Guid.Empty)
+        {
+            var existingAssignment = await _assetAssignmentRepository.GetAssignmentUserIdAsync(asset.Id);
+
+            if (existingAssignment != assetDto.UserId)
+            {
+                var assetAssignment = await _assetAssignmentRepository.GetByIdOrNullAsync(asset.Id);
+
+                if (assetAssignment is null)
+                {
+                    assetAssignment = assetDto.Type switch
+                    {
+                        UserContactType.User => new AssetAssignment(asset.Id, assetDto.UserId, null),
+                        UserContactType.Contact => new AssetAssignment(asset.Id, null, assetDto.UserId),
+                        _ => throw new EntityValidationException("Tipo de usuário ou contato inválido.")
+                    };
+
+                    await _assetAssignmentRepository.SaveAsync(assetAssignment);
+                }
+                else
+                {
+                    switch (assetDto.Type)
+                    {
+                        case UserContactType.User:
+                            assetAssignment.AssignToUser(assetDto.UserId.Value);
+                            break;
+                        case UserContactType.Contact:
+                            assetAssignment.AssignToContact(assetDto.UserId.Value);
+                            break;
+                        default:
+                            throw new EntityValidationException("Tipo de usuário ou contato inválido.");
+                    }
+
+                    _assetAssignmentRepository.Update(assetAssignment);
+                }
+            }
+        }
+        else
+        {
+            var assetAssignment = await _assetAssignmentRepository.GetByIdOrNullAsync(asset.Id);
+            assetAssignment?.CancelAssignment();
+        }
+
+        _assetRepository.Update(asset);
+        await _unitOfWork.CommitAsync();
+
+        return true;
+    }
+
+
     public async Task<bool> DeleteAssetsAsync(List<Guid> ids)
     {
         var assets = await _assetRepository.GetAllAsync();
@@ -58,6 +166,7 @@ public class AssetService : Service<AssetDto, Asset>, IAssetService
         foreach (var asset in assetsToDelete)
             _assetRepository.Delete(asset);
 
+        await _unitOfWork.CommitAsync();
         return true;
     }
 
@@ -69,6 +178,7 @@ public class AssetService : Service<AssetDto, Asset>, IAssetService
             throw new EntityValidationException("Ativo não encontrado.");
 
         _assetRepository.Delete(asset);
+        await _unitOfWork.CommitAsync();
 
         return true;
     }

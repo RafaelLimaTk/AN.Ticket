@@ -28,17 +28,17 @@ public class AssetAssignmentMap : IEntityTypeConfiguration<AssetAssignment>
             .IsRequired(false);
 
         builder.HasOne(aa => aa.Asset)
-            .WithMany()
+            .WithMany(a => a.AssetAssignments)
             .HasForeignKey(aa => aa.AssetId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(aa => aa.User)
-            .WithMany()
+            .WithMany(u => u.AssetAssignments)
             .HasForeignKey(aa => aa.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(aa => aa.Contact)
-            .WithMany()
+            .WithMany(c => c.AssetAssignments)
             .HasForeignKey(aa => aa.ContactId)
             .OnDelete(DeleteBehavior.Restrict);
     }

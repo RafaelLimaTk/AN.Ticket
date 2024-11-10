@@ -10,7 +10,8 @@ public class BreadcrumbViewComponent : ViewComponent
         { "Home", "Início" },
         { "Ticket", "Tickets" },
         { "Contact", "Contatos" },
-        { "Activity", "Atividades" }
+        { "Activity", "Atividades" },
+        { "Asset", "Ativos" }
     };
 
     private readonly Dictionary<string, Dictionary<string, string>> _actionFriendlyNames = new Dictionary<string, Dictionary<string, string>>

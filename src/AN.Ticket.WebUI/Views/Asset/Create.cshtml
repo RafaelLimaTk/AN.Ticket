@@ -1,0 +1,111 @@
+﻿@model AN.Ticket.Application.DTOs.Asset.AssetDto
+
+@{
+    bool isEdit = Model.Id != Guid.Empty;
+    ViewBag.Title = isEdit ? "Editar Ativo" : "Criar Ativo";
+}
+
+@await Component.InvokeAsync("Breadcrumb")
+
+<style>
+    .fixed-bottom {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        z-index: 1030;
+        background-color: white;
+        border-top: 1px solid #dee2e6;
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="@(isEdit ? "Edit" : "Create")" asp-controller="Asset" method="post">
+                @if (isEdit)
+                {
+                    <input type="hidden" asp-for="Id" />
+                }
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Informações do Ativo
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Nome</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="SerialNumber" class="form-label">Número de Série</label>
+                            <input asp-for="SerialNumber" class="form-control" />
+                            <span asp-validation-for="SerialNumber" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="AssetType" class="form-label">Tipo de Ativo</label>
+                            <input asp-for="AssetType" class="form-control" />
+                            <span asp-validation-for="AssetType" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="PurchaseDate" class="form-label">Data de Compra</label>
+                            <input asp-for="PurchaseDate" type="date" class="form-control" />
+                            <span asp-validation-for="PurchaseDate" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Value" class="form-label">Valor</label>
+                            <input asp-for="Value" type="number" step="0.01" class="form-control" />
+                            <span asp-validation-for="Value" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Descrição</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="UserId" class="form-label">Usuário ou Contato</label>
+                            <select asp-for="UserId" class="form-select" id="userContactDropdown">
+                                <option value="">Nenhum Usuário ou Contato Associado</option>
+                                @foreach (var userContact in ViewBag.UserContacts)
+                                {
+                                    if (userContact.Id == Model.UserId)
+                                    {
+                                        <option value="@userContact.Id" selected data-type="@userContact.Type">@userContact.FullName (@userContact.Type)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@userContact.Id" data-type="@userContact.Type">@userContact.FullName (@userContact.Type)</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="UserId" class="text-danger"></span>
+                        </div>
+                        <input type="hidden" asp-for="Type" id="userContactType" />
+                    </div>
+                </div>
+                <div class="fixed-bottom text-end p-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi @(isEdit ? "bi-pencil" : "bi-plus")"></i> @(isEdit ? "Atualizar Ativo" : "Criar Ativo")
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="card sticky-top">
+                <div class="card-header">
+                    Detalhes Relacionados
+                </div>
+                <div class="card-body">
+                    <div id="userDetailsContainer">
+                        @await Component.InvokeAsync("AssetUserDetails", new { userId = Model.UserId ?? Guid.Empty })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/asset.js"></script>
+}

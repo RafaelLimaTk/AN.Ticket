@@ -1,31 +1,32 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AN.Ticket.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace AN.Ticket.Application.DTOs.Asset;
 public class AssetDto
 {
-    public Guid? Id { get; set; }
+    public Guid Id { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "O Nome é obrigatório.")]
     [StringLength(100, ErrorMessage = "O nome do ativo deve ter no máximo 100 caracteres.")]
     [Display(Name = "Nome")]
     public string Name { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "O Número de Série é obrigatório.")]
     [StringLength(100, ErrorMessage = "O número de série deve ter no máximo 100 caracteres.")]
     [Display(Name = "Número de Série")]
     public string SerialNumber { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "O Tipo de Ativo é obrigatório.")]
     [StringLength(50, ErrorMessage = "O tipo do ativo deve ter no máximo 50 caracteres.")]
     [Display(Name = "Tipo de Ativo")]
     public string AssetType { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "A Data de Compra é obrigatória.")]
     [Display(Name = "Data de Compra")]
     [DataType(DataType.Date)]
     public DateTime PurchaseDate { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "O Valor é obrigatório.")]
     [Range(0.01, double.MaxValue, ErrorMessage = "O valor deve ser maior que zero.")]
     [Display(Name = "Valor")]
     public decimal Value { get; set; }
@@ -35,6 +36,9 @@ public class AssetDto
     public string? Description { get; set; }
 
     public Guid? DepartmentId { get; set; }
+
+    public Guid? UserId { get; set; }
+    public UserContactType? Type { get; set; }
 
     public string? Status { get; set; }
 

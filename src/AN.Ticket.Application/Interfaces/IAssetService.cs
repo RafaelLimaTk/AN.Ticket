@@ -8,6 +8,8 @@ namespace AN.Ticket.Application.Interfaces;
 public interface IAssetService : IService<AssetDto, Asset>
 {
     Task<PagedResult<AssetDto>> GetPaginatedAssetsAsync(int pageNumber, int pageSize, string searchTerm = "");
+    Task<bool> CreateAssetAsync(AssetDto assetDto);
+    Task<bool> UpdateAssetAsync(AssetDto assetDto);
     Task<bool> DeleteAssetsAsync(List<Guid> ids);
     Task<bool> DeleteAssetAsync(Guid id);
 }

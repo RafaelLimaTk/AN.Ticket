@@ -35,7 +35,7 @@ public class AssetMap : IEntityTypeConfiguration<Asset>
             .HasMaxLength(500);
 
         builder.HasMany(a => a.AssetAssignments)
-            .WithOne()
+            .WithOne(aa => aa.Asset)
             .HasForeignKey(aa => aa.AssetId);
     }
 }

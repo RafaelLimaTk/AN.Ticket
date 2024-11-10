@@ -4,13 +4,13 @@ namespace AN.Ticket.Domain.Entities;
 public class AssetAssignment : EntityBase
 {
     public Guid AssetId { get; private set; }
-    public Asset Asset { get; private set; }
+    public Asset Asset { get; set; }
 
     public Guid? UserId { get; private set; }
-    public User? User { get; private set; }
+    public User? User { get; set; }
 
     public Guid? ContactId { get; private set; }
-    public Contact? Contact { get; private set; }
+    public Contact? Contact { get; set; }
 
     public DateTime AssignedAt { get; private set; }
     public DateTime? ReturnedAt { get; private set; }
@@ -52,5 +52,12 @@ public class AssetAssignment : EntityBase
     {
         if (ReturnedAt != null) throw new InvalidOperationException("O ativo já foi devolvido.");
         ReturnedAt = DateTime.UtcNow;
+    }
+
+    public void CancelAssignment()
+    {
+        UserId = null;
+        ContactId = null;
+        ReturnedAt = null;
     }
 }

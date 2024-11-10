@@ -1,0 +1,76 @@
+﻿@model AN.Ticket.WebUI.ViewModels.Asset.AssetUserDetailViewModel
+
+@if (Model != null && Model.UserId != Guid.Empty)
+{
+    <div class="card mb-3">
+        <div class="card-header">
+            Detalhes do Usuário/Contato
+        </div>
+        <div class="card-body">
+            <div class="user-details">
+                <div class="profile-picture">
+                    @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                    {
+                        <img src="@Model.ProfilePicture" alt="Profile Picture" class="img-fluid rounded-circle" />
+                    }
+                    else
+                    {
+                        <div class="initials-circle">
+                            @Model.FullName.Substring(0, 1).ToUpper()
+                        </div>
+                    }
+                </div>
+                <div class="user-info">
+                    <h5>@Model.FullName</h5>
+                    <p>@Model.Email</p>
+                    <span class="badge bg-primary">@Model.Role</span>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card mb-3">
+        <div class="card-header">
+            Detalhes do Usuário/Contato
+        </div>
+        <div class="card-body">
+            <p class="text-muted text-center">Nenhum usuário ou contato selecionado.</p>
+        </div>
+    </div>
+}
+
+<style>
+    .user-details {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .profile-picture img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+    }
+    .initials-circle {
+        width: 50px;
+        height: 50px;
+        background-color: #28a745;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 20px;
+    }
+    .user-info h5 {
+        margin: 0;
+    }
+    .user-info p {
+        margin: 0;
+        color: #6c757d;
+    }
+    .badge {
+        font-size: 12px;
+    }
+</style>

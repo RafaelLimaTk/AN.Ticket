@@ -1,23 +1,24 @@
 ﻿@model AN.Ticket.WebUI.Components.ContactDropdownViewModel
 
 <style>
-    .btn-drop {
+    #contactDropdown .btn-drop {
         background-color: #FFFFFF;
         color: #010101;
     }
-    .dropdown-menu {
+
+    #contactDropdown .dropdown-menu {
         width: 100%;
         max-height: 200px;
         overflow-y: auto;
     }
 
-    .dropdown-menu input[type="text"] {
+    #contactDropdown .dropdown-menu input[type="text"] {
         width: calc(100% - 1rem);
         margin: 0.5rem auto;
     }
 </style>
 
-<div class="input-group">
+<div id="contactDropdown" class="input-group">
     <input type="text" class="form-control" placeholder="Digite ou pesquise contato..." id="contactInput" aria-label="Digite ou pesquise contato" aria-describedby="searchIcon">
     <input type="hidden" id="selectedContactName" name="Name" />
     <span class="input-group-text border-1" id="searchIcon" style="background-color: #e9ecef" data-bs-toggle="dropdown" aria-expanded="false">

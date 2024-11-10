@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AN.Ticket.Infra.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240906020636_AlterTable_Payment_Column_MonthlyFee")]
-    partial class AlterTable_Payment_Column_MonthlyFee
+    [Migration("20241110223228_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,6 +50,9 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.Property<DateTime>("ScheduledDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<string>("Subject")
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
@@ -78,6 +81,120 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.ToTable("Activities", (string)null);
                 });
 
+            modelBuilder.Entity("AN.Ticket.Domain.Entities.Asset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("AssetType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Assets", (string)null);
+                });
+
+            modelBuilder.Entity("AN.Ticket.Domain.Entities.AssetAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("AssetId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("ContactId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("ReturnedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetId");
+
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AssetAssignments", (string)null);
+                });
+
+            modelBuilder.Entity("AN.Ticket.Domain.Entities.Attachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("longblob");
+
+                    b.Property<string>("ContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("FileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<Guid>("TicketId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketId");
+
+                    b.ToTable("Attachments", (string)null);
+                });
+
             modelBuilder.Entity("AN.Ticket.Domain.Entities.Contact", b =>
                 {
                     b.Property<Guid>("Id")
@@ -86,14 +203,13 @@ namespace AN.Ticket.Infra.Data.Migrations
 
                     b.Property<string>("Cpf")
                         .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("varchar(12)");
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Department")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
@@ -128,7 +244,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
@@ -246,6 +361,36 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.ToTable("PaymentPlans", (string)null);
                 });
 
+            modelBuilder.Entity("AN.Ticket.Domain.Entities.SatisfactionRating", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TicketId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketId")
+                        .IsUnique();
+
+                    b.ToTable("SatisfactionRatings", (string)null);
+                });
+
             modelBuilder.Entity("AN.Ticket.Domain.Entities.Team", b =>
                 {
                     b.Property<Guid>("Id")
@@ -279,10 +424,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)");
 
-                    b.Property<string>("AttachmentFile")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
                     b.Property<string>("Classification")
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
@@ -299,12 +440,15 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)");
+
+                    b.Property<string>("EmailMessageId")
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("FirstResponseAt")
                         .HasColumnType("datetime(6)");
@@ -316,6 +460,10 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.Property<int>("Priority")
                         .HasColumnType("int");
 
+                    b.Property<string>("Resolution")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -323,6 +471,9 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
+
+                    b.Property<int>("TicketCode")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
@@ -344,21 +495,22 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime");
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateTime?>("SentAt")
+                        .IsRequired()
+                        .HasColumnType("datetime");
 
                     b.Property<Guid>("TicketId")
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("char(36)");
@@ -387,6 +539,9 @@ namespace AN.Ticket.Infra.Data.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ProfilePicture")
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -669,6 +824,42 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.Navigation("Ticket");
                 });
 
+            modelBuilder.Entity("AN.Ticket.Domain.Entities.AssetAssignment", b =>
+                {
+                    b.HasOne("AN.Ticket.Domain.Entities.Asset", "Asset")
+                        .WithMany("AssetAssignments")
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AN.Ticket.Domain.Entities.Contact", "Contact")
+                        .WithMany("AssetAssignments")
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("AN.Ticket.Domain.Entities.User", "User")
+                        .WithMany("AssetAssignments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Asset");
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AN.Ticket.Domain.Entities.Attachment", b =>
+                {
+                    b.HasOne("AN.Ticket.Domain.Entities.Ticket", "Ticket")
+                        .WithMany("Attachments")
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ticket");
+                });
+
             modelBuilder.Entity("AN.Ticket.Domain.Entities.Contact", b =>
                 {
                     b.HasOne("AN.Ticket.Domain.Entities.User", "User")
@@ -724,44 +915,23 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.Navigation("PaymentPlan");
                 });
 
+            modelBuilder.Entity("AN.Ticket.Domain.Entities.SatisfactionRating", b =>
+                {
+                    b.HasOne("AN.Ticket.Domain.Entities.Ticket", "Ticket")
+                        .WithOne("SatisfactionRating")
+                        .HasForeignKey("AN.Ticket.Domain.Entities.SatisfactionRating", "TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ticket");
+                });
+
             modelBuilder.Entity("AN.Ticket.Domain.Entities.Ticket", b =>
                 {
                     b.HasOne("AN.Ticket.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.OwnsOne("AN.Ticket.Domain.Entities.SatisfactionRating", "SatisfactionRating", b1 =>
-                        {
-                            b1.Property<Guid>("TicketId")
-                                .HasColumnType("char(36)");
-
-                            b1.Property<string>("Comment")
-                                .HasColumnType("longtext");
-
-                            b1.Property<DateTime>("CreatedAt")
-                                .HasColumnType("datetime(6)");
-
-                            b1.Property<Guid>("Id")
-                                .HasColumnType("char(36)");
-
-                            b1.Property<int?>("Rating")
-                                .HasColumnType("int");
-
-                            b1.Property<DateTime>("UpdatedAt")
-                                .HasColumnType("datetime(6)");
-
-                            b1.HasKey("TicketId");
-
-                            b1.ToTable("SatisfactionRatings");
-
-                            b1.WithOwner("Ticket")
-                                .HasForeignKey("TicketId");
-
-                            b1.Navigation("Ticket");
-                        });
-
-                    b.Navigation("SatisfactionRating");
 
                     b.Navigation("User");
                 });
@@ -861,8 +1031,15 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AN.Ticket.Domain.Entities.Asset", b =>
+                {
+                    b.Navigation("AssetAssignments");
+                });
+
             modelBuilder.Entity("AN.Ticket.Domain.Entities.Contact", b =>
                 {
+                    b.Navigation("AssetAssignments");
+
                     b.Navigation("SocialNetworks");
                 });
 
@@ -870,9 +1047,18 @@ namespace AN.Ticket.Infra.Data.Migrations
                 {
                     b.Navigation("Activities");
 
+                    b.Navigation("Attachments");
+
                     b.Navigation("InteractionHistories");
 
                     b.Navigation("Messages");
+
+                    b.Navigation("SatisfactionRating");
+                });
+
+            modelBuilder.Entity("AN.Ticket.Domain.Entities.User", b =>
+                {
+                    b.Navigation("AssetAssignments");
                 });
 #pragma warning restore 612, 618
         }

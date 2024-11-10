@@ -129,16 +129,10 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.Property<Guid>("AssetId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("AssetId1")
-                        .HasColumnType("char(36)");
-
                     b.Property<DateTime>("AssignedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<Guid?>("ContactId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid?>("ContactId1")
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -153,22 +147,13 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.Property<Guid?>("UserId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("char(36)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AssetId");
 
-                    b.HasIndex("AssetId1");
-
                     b.HasIndex("ContactId");
 
-                    b.HasIndex("ContactId1");
-
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("AssetAssignments", (string)null);
                 });
@@ -554,7 +539,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("ProfilePicture")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -839,36 +823,20 @@ namespace AN.Ticket.Infra.Data.Migrations
 
             modelBuilder.Entity("AN.Ticket.Domain.Entities.AssetAssignment", b =>
                 {
-                    b.HasOne("AN.Ticket.Domain.Entities.Asset", null)
+                    b.HasOne("AN.Ticket.Domain.Entities.Asset", "Asset")
                         .WithMany("AssetAssignments")
                         .HasForeignKey("AssetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AN.Ticket.Domain.Entities.Asset", "Asset")
-                        .WithMany()
-                        .HasForeignKey("AssetId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("AN.Ticket.Domain.Entities.Contact", "Contact")
-                        .WithMany()
+                        .WithMany("AssetAssignments")
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("AN.Ticket.Domain.Entities.Contact", null)
-                        .WithMany("AssetAssignments")
-                        .HasForeignKey("ContactId1")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("AN.Ticket.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("AN.Ticket.Domain.Entities.User", null)
                         .WithMany("AssetAssignments")
-                        .HasForeignKey("UserId1")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Asset");
