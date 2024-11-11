@@ -2,6 +2,7 @@
 
 @{
     bool isEdit = Model.IsEditTicket;
+    bool isScreen = Model.IsScreenTicket;
     ViewBag.Title = isEdit ? "Editar Atividade" : "Criar Atividade";
 }
 
@@ -97,7 +98,8 @@
                             </select>
                             <span asp-validation-for="TicketId" class="text-danger"></span>
                         </div>
-                        <input type="hidden" asp-for=IsEditTicket value="true" />
+                        <input type="hidden" asp-for=IsEditTicket value="@isEdit" />
+                        <input type="hidden" asp-for=IsScreenTicket value="@isScreen" />
                     </div>
                 </div>
                 <div class="fixed-bottom text-end p-3">
