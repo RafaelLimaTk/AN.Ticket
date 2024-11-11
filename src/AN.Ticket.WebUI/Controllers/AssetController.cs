@@ -64,8 +64,9 @@ public class AssetController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(AssetDto model)
     {
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid || !model.IsValidFileType())
         {
+            ModelState.AddModelError("Files", "Tipo de arquivo não suportado. Somente pdf, jpg, jpeg, e png são permitidos.");
             ViewBag.UserContacts = await GetUserContactsAsync();
             return View(model);
         }
@@ -100,7 +101,8 @@ public class AssetController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        var userId = await _assetAssignmentService.GetAssignmentUserIdAsync(id);
+        var userId = await _assetAssignmentService.GetAssignmentUserIdAsync(asset.Id);
+        var assetFiles = await _assetService.GetAssetFilesAsync(id);
 
         var assetDto = new AssetDto
         {
@@ -111,7 +113,13 @@ public class AssetController : Controller
             PurchaseDate = asset.PurchaseDate,
             Value = asset.Value,
             Description = asset.Description,
-            UserId = userId
+            UserId = userId,
+            ExistingFiles = assetFiles.Select(f => new AssetFileDto
+            {
+                Id = f.Id,
+                FileName = f.FileName,
+                FileContent = f.FileContent
+            }).ToList()
         };
 
         ViewBag.UserContacts = await GetUserContactsAsync();

@@ -1,5 +1,7 @@
 ﻿using AN.Ticket.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace AN.Ticket.Application.DTOs.Asset;
 public class AssetDto
@@ -35,6 +37,9 @@ public class AssetDto
     [StringLength(500, ErrorMessage = "A descrição deve ter no máximo 500 caracteres.")]
     public string? Description { get; set; }
 
+    public List<IFormFile>? Files { get; set; }
+    public List<AssetFileDto> ExistingFiles { get; set; } = new List<AssetFileDto>();
+
     public Guid? DepartmentId { get; set; }
 
     public Guid? UserId { get; set; }
@@ -45,4 +50,28 @@ public class AssetDto
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public bool IsValidFileType()
+    {
+        if (Files == null) return true;
+
+        var allowedExtensions = new[] { ".pdf", ".jpg", ".jpeg", ".png" };
+
+        foreach (var file in Files)
+        {
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(extension))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+public class AssetFileDto
+{
+    public Guid Id { get; set; }
+    public string FileName { get; set; }
+    public byte[] FileContent { get; set; }
 }

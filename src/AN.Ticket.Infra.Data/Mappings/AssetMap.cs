@@ -37,5 +37,9 @@ public class AssetMap : IEntityTypeConfiguration<Asset>
         builder.HasMany(a => a.AssetAssignments)
             .WithOne(aa => aa.Asset)
             .HasForeignKey(aa => aa.AssetId);
+
+        builder.HasMany(a => a.AssetFiles)
+            .WithOne(af => af.Asset)
+            .HasForeignKey(af => af.AssetId);
     }
 }

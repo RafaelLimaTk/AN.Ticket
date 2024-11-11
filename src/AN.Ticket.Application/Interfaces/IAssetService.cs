@@ -12,4 +12,5 @@ public interface IAssetService : IService<AssetDto, Asset>
     Task<bool> UpdateAssetAsync(AssetDto assetDto);
     Task<bool> DeleteAssetsAsync(List<Guid> ids);
     Task<bool> DeleteAssetAsync(Guid id);
+    Task<List<AssetFileDto>> GetAssetFilesAsync(Guid assetId);
 }

@@ -11,10 +11,12 @@ public class Asset : EntityBase
     public string? Description { get; private set; }
 
     public ICollection<AssetAssignment> AssetAssignments { get; private set; }
+    public ICollection<AssetFile> AssetFiles { get; private set; }
 
     protected Asset()
     {
         AssetAssignments = new List<AssetAssignment>();
+        AssetFiles = new List<AssetFile>();
     }
 
     public Asset(string name, string serialNumber, string assetType, DateTime purchaseDate, decimal value, string? description = null)
@@ -32,6 +34,7 @@ public class Asset : EntityBase
         Value = value;
         Description = description;
         AssetAssignments = new List<AssetAssignment>();
+        AssetFiles = new List<AssetFile>();
     }
 
     public void UpdateDetails(string name, string serialNumber, string assetType, DateTime purchaseDate, decimal value, string? description = null)

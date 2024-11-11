@@ -13,18 +13,21 @@ public class AssetService : Service<AssetDto, Asset>, IAssetService
 {
     private readonly IAssetRepository _assetRepository;
     private readonly IAssetAssignmentRepository _assetAssignmentRepository;
+    private readonly IAssetFileRepository _assetFileRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public AssetService(
         IRepository<Asset> repository,
         IAssetRepository assetRepository,
         IAssetAssignmentRepository assetAssignmentRepository,
+        IAssetFileRepository assetFileRepository,
         IUnitOfWork unitOfWork
     )
         : base(repository)
     {
         _assetRepository = assetRepository;
         _assetAssignmentRepository = assetAssignmentRepository;
+        _assetFileRepository = assetFileRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -77,6 +80,21 @@ public class AssetService : Service<AssetDto, Asset>, IAssetService
             };
         }
 
+        if (assetDto.Files is not null && assetDto.Files.Any())
+        {
+            foreach (var file in assetDto.Files)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await file.CopyToAsync(memoryStream);
+                    var fileContent = memoryStream.ToArray();
+
+                    var assetFile = new AssetFile(asset.Id, file.FileName, fileContent);
+                    await _assetFileRepository.SaveAsync(assetFile);
+                }
+            }
+        }
+
         await _assetRepository.SaveAsync(asset);
 
         await _unitOfWork.CommitAsync();
@@ -95,6 +113,8 @@ public class AssetService : Service<AssetDto, Asset>, IAssetService
 
         if (asset is null)
             throw new EntityValidationException("Ativo não encontrado.");
+
+        var assetFiles = await _assetFileRepository.GetAssetFilesAsync(asset.Id);
 
         asset.UpdateDetails(
             assetDto.Name,
@@ -148,6 +168,27 @@ public class AssetService : Service<AssetDto, Asset>, IAssetService
             assetAssignment?.CancelAssignment();
         }
 
+        if (assetDto.Files is not null && assetDto.Files.Any())
+        {
+            foreach (var file in assetDto.Files)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await file.CopyToAsync(memoryStream);
+                    var fileContent = memoryStream.ToArray();
+
+                    var assetFile = new AssetFile(asset.Id, file.FileName, fileContent);
+                    await _assetFileRepository.SaveAsync(assetFile);
+                }
+            }
+        }
+
+        foreach (var file in assetFiles)
+        {
+            if (!assetDto.ExistingFiles.Any(f => f.Id == file.Id))
+                _assetFileRepository.Delete(file);
+        }
+
         _assetRepository.Update(asset);
         await _unitOfWork.CommitAsync();
 
@@ -181,5 +222,17 @@ public class AssetService : Service<AssetDto, Asset>, IAssetService
         await _unitOfWork.CommitAsync();
 
         return true;
+    }
+
+    public async Task<List<AssetFileDto>> GetAssetFilesAsync(Guid assetId)
+    {
+        var assetFiles = await _assetFileRepository.GetAssetFilesAsync(assetId);
+
+        return assetFiles.Select(f => new AssetFileDto
+        {
+            Id = f.Id,
+            FileName = f.FileName,
+            FileContent = f.FileContent
+        }).ToList();
     }
 }
