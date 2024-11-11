@@ -6,4 +6,5 @@ public class AttachmentDto
     public string? ContentType { get; set; }
     public DateTime CreatedAt { get; set; }
     public long Size { get; set; }
+    public Guid? TicketMessageId { get; private set; }
 }

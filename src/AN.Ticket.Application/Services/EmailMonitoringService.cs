@@ -144,7 +144,7 @@ public class EmailMonitoringService : IEmailMonitoringService
 
                 var existingMessages = EmailParser.ParseEmailThread(body);
                 //var formattedMessages = await _chatGptService.GenerateResponseAsync(body);
-                await HandleAttachmentsAndAddMessages(ticket, attachments);
+                await HandleAttachmentsAndAddMessages(ticket, existingMessages, attachments);
 
                 foreach (var msg in existingMessages)
                 {
@@ -207,7 +207,7 @@ public class EmailMonitoringService : IEmailMonitoringService
             //    msg.Mensagem,
             //    DateTime.Parse(msg.Data)
             //)).ToList();
-            await HandleAttachmentsAndAddMessages(newTicket, attachments);
+            await HandleAttachmentsAndAddMessages(newTicket, messages, attachments);
 
             newTicket.AddMessages(messages);
             //newTicket.AddMessages(ticketMessages);
@@ -228,19 +228,53 @@ public class EmailMonitoringService : IEmailMonitoringService
         await _unitOfWork.CommitAsync();
     }
 
-    private async Task HandleAttachmentsAndAddMessages(DomainEntity.Ticket ticket, List<EmailAttachment> attachments)
+    private async Task HandleAttachmentsAndAddMessages(DomainEntity.Ticket ticket, List<TicketMessage> messages, List<EmailAttachment> attachments)
     {
-        foreach (var attachment in attachments)
+        if (messages != null && messages.Count > 0)
         {
-            var ticketAttachment = new DomainEntity.Attachment(
-                attachment.FileName,
-                attachment.Content,
-                attachment.ContentType,
-                ticket.Id
-            );
-            ticket.AddAttachment(ticketAttachment);
+            int messageCount = messages.Count;
 
-            await _attachmentRepository.SaveAsync(ticketAttachment);
+            for (int i = 0; i < attachments.Count; i++)
+            {
+                var messageIndex = i % messageCount;
+                var message = messages[messageIndex];
+
+                var ticketAttachment = new DomainEntity.Attachment(
+                    attachments[i].FileName,
+                    attachments[i].Content,
+                    attachments[i].ContentType,
+                    ticket.Id,
+                    message.Id
+                );
+
+                ticket.AddAttachment(ticketAttachment);
+                await _attachmentRepository.SaveAsync(ticketAttachment);
+            }
+        }
+        else
+        {
+            var defaultMessage = new TicketMessage("Anexo recebido sem mensagem.", DateTime.UtcNow);
+            defaultMessage.TicketId = ticket.Id;
+
+            if (attachments.Any())
+            {
+                await _ticketMessageRepository.SaveAsync(defaultMessage);
+                ticket.AddMessages(new List<TicketMessage> { defaultMessage });
+            }
+
+            foreach (var attachment in attachments)
+            {
+                var ticketAttachment = new DomainEntity.Attachment(
+                    attachment.FileName,
+                    attachment.Content,
+                    attachment.ContentType,
+                    ticket.Id,
+                    defaultMessage.Id
+                );
+
+                ticket.AddAttachment(ticketAttachment);
+                await _attachmentRepository.SaveAsync(ticketAttachment);
+            }
         }
 
         await _unitOfWork.CommitAsync();
@@ -250,19 +284,26 @@ public class EmailMonitoringService : IEmailMonitoringService
     {
         var attachments = new List<EmailAttachment>();
 
-        foreach (var attachment in emailMessage.Attachments)
+        foreach (var part in emailMessage.BodyParts)
         {
-            if (attachment is MimePart mimePart)
+            if (part is MimePart mimePart && !string.IsNullOrEmpty(mimePart.FileName))
             {
-                using var memoryStream = new MemoryStream();
-                mimePart.Content.DecodeTo(memoryStream);
+                var isAttachment = mimePart.ContentDisposition != null &&
+                                   (mimePart.ContentDisposition.Disposition == ContentDisposition.Attachment ||
+                                    mimePart.ContentDisposition.Disposition == ContentDisposition.Inline);
 
-                attachments.Add(new EmailAttachment
-                (
-                    mimePart.FileName,
-                    memoryStream.ToArray(),
-                    mimePart.ContentType.MimeType
-                ));
+                if (isAttachment)
+                {
+                    using var memoryStream = new MemoryStream();
+                    mimePart.Content.DecodeTo(memoryStream);
+
+                    attachments.Add(new EmailAttachment
+                    (
+                        mimePart.FileName,
+                        memoryStream.ToArray(),
+                        mimePart.ContentType.MimeType
+                    ));
+                }
             }
         }
 

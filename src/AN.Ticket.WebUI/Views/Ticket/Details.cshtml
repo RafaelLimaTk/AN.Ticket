@@ -105,7 +105,16 @@
                         <i class="bi bi-clock"></i>
                         <span class="mx-2">@FormatTimeWithAmPm(Model.Ticket.CreatedAt)</span>
                         <i class="bi bi-play-circle me-1"></i>
-                        <span class="badge bg-light border text-black">00:00:00</span>
+                        <span class="badge bg-light border text-black">
+                            @if (Model.Ticket.Status == TicketStatus.Closed && Model.Ticket.ClosedAt.HasValue)
+                            {
+                                @FormatTimeWithAmPm(Model.Ticket.ClosedAt.Value)
+                            }
+                            else
+                            {
+                                @:00:00:00
+                            }
+                        </span>
                     </div>
                 </div>
                 <div>
@@ -171,6 +180,24 @@
                                         <br />
                                         <small class="text-muted">@firstMessage.SentAt?.ToString("dd MMM yyyy hh:mm tt")</small>
                                     </div>
+                                    @if (firstMessage.Attachments != null && firstMessage.Attachments.Any())
+                                    {
+                                        <div class="dropdown ms-auto">
+                                            <button class="btn btn-link p-0" type="button" id="attachmentDropdown_@firstMessage.Id" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="attachmentList_@firstMessage.Id" onclick="event.stopPropagation();">
+                                                <i class="bi bi-paperclip"></i> (@firstMessage.Attachments.Count)
+                                            </button>
+                                            <ul class="dropdown-menu" id="attachmentList_@firstMessage.Id" aria-labelledby="attachmentDropdown_@firstMessage.Id">
+                                                @foreach (var attachment in firstMessage.Attachments)
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item" href="@Url.Action("Download", "Attachment", new { id = attachment.Id })" download>
+                                                            <i class="bi bi-file-earmark-arrow-down"></i> @attachment.FileName
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
                                 </div>
                                 <p class="message-body">
                                     @firstMessage.Message
@@ -191,6 +218,24 @@
                                         <small class="text-muted">@message.SentAt?.ToString("dd MMM yyyy hh:mm tt")</small>
                                     </div>
                                     <span class="icon-expand"><i class="bi bi-caret-down"></i></span>
+                                    @if (message.Attachments != null && message.Attachments.Any())
+                                    {
+                                        <div class="dropdown ms-auto">
+                                            <button class="btn btn-link p-0" type="button" id="attachmentDropdown_@message.Id" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="attachmentList_@message.Id" onclick="event.stopPropagation();">
+                                                <i class="bi bi-paperclip"></i> (@message.Attachments.Count)
+                                            </button>
+                                            <ul class="dropdown-menu" id="attachmentList_@message.Id" aria-labelledby="attachmentDropdown_@message.Id">
+                                                @foreach (var attachment in message.Attachments)
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item" href="@Url.Action("Download", "Attachment", new { id = attachment.Id })" download>
+                                                            <i class="bi bi-file-earmark-arrow-down"></i> @attachment.FileName
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
                                 </div>
                                 <p class="message-body">
                                     @message.Message

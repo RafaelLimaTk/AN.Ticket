@@ -1,4 +1,5 @@
-﻿using AN.Ticket.Application.DTOs.User;
+﻿using AN.Ticket.Application.DTOs.Attachment;
+using AN.Ticket.Application.DTOs.User;
 
 namespace AN.Ticket.Application.DTOs.Ticket;
 public class TicketMessageDto
@@ -9,4 +10,5 @@ public class TicketMessageDto
     public UserDto? User { get; set; }
     public DateTime? SentAt { get; set; }
     public bool IsFromSupport { get; set; }
+    public List<AttachmentDto> Attachments { get; set; }
 }

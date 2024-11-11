@@ -75,6 +75,21 @@ public class TicketService
         if (createTicket.UserId != Guid.Empty)
             ticket.AssignUsers(createTicket.UserId);
 
+        var ticketMessage = new TicketMessage(
+            createTicket.Description,
+            DateTime.UtcNow.AddHours(-3)
+        );
+
+        if (createTicket.UserId != Guid.Empty)
+            ticketMessage.AssignUser(createTicket.UserId);
+
+        ticketMessage.AssignTicket(ticket.Id);
+
+        var listTicketMessages = new List<TicketMessage> { ticketMessage };
+        ticket.AddMessages(listTicketMessages);
+
+        await _ticketMessageRepository.SaveAsync(ticketMessage);
+
         if (createTicket.AttachmentFile != null && createTicket.AttachmentFile.Length > 0)
         {
             if (createTicket.AttachmentFile.Length > 10485760)
@@ -89,7 +104,8 @@ public class TicketService
                 createTicket.AttachmentFile.FileName,
                 memoryStream.ToArray(),
                 createTicket.AttachmentFile.ContentType,
-                ticket.Id
+                ticket.Id,
+                ticketMessage.Id
             );
 
             ticket.AddAttachment(attachment);
@@ -97,44 +113,77 @@ public class TicketService
             await _attachmentRepository.SaveAsync(attachment);
         }
 
-        var ticketMessage = new TicketMessage(
-            createTicket.Description,
-            DateTime.UtcNow.AddHours(-3)
-        );
-
-        if (createTicket.UserId != Guid.Empty)
-            ticketMessage.AssignUser(createTicket.UserId);
-
-        ticketMessage.AssignTicket(ticket.Id);
-
-        var listTicketMessages = new List<TicketMessage> { ticketMessage };
-        ticket.AddMessages(listTicketMessages);
-
         await _ticketRepository.SaveAsync(ticket);
-        await _ticketMessageRepository.SaveAsync(ticketMessage);
         await _unitOfWork.CommitAsync();
 
         var code = await _ticketRepository.GetTicketCodeByIdAsync(ticket.Id);
+
+        //await _emailSenderService.SendEmailAsync(
+        //    ticket.Email,
+        //    ticket.Subject,
+        //    $@"
+        //    <html>
+        //        <body>
+        //            <h2 style='color: #0056b3;'>Olá {ticket.ContactName},</h2>
+        //            <p>#{code}</p>
+        //            <p>Obrigado por entrar em contato com o nosso suporte! Seu ticket foi <strong>criado com sucesso</strong> e nossa equipe já está trabalhando para resolvê-lo. Se você tiver mais detalhes ou informações para adicionar, basta responder este e-mail.</p>
+
+        //            <h3>Detalhes do Ticket:</h3>
+        //            <ul style='list-style-type: none; padding: 0;'>
+        //                <li><strong>Assunto:</strong> {ticket.Subject}</li>
+        //                <li><strong>Descrição:</strong> {createTicket.Description}</li>
+        //            </ul>
+
+        //            <hr style='border: 0; border-top: 1px solid #eee;' />
+
+        //            <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
+        //        </body>
+        //    </html>"
+        //);
 
         await _emailSenderService.SendEmailAsync(
             ticket.Email,
             ticket.Subject,
             $@"
             <html>
+                
                 <body>
-                    <h2 style='color: #0056b3;'>Olá {ticket.ContactName},</h2>
-                    <p>#{code}</p>
-                    <p>Obrigado por entrar em contato com o nosso suporte! Seu ticket foi <strong>criado com sucesso</strong> e nossa equipe já está trabalhando para resolvê-lo. Se você tiver mais detalhes ou informações para adicionar, basta responder este e-mail.</p>
+                    <div style='max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f9f9f9;'>
             
-                    <h3>Detalhes do Ticket:</h3>
-                    <ul style='list-style-type: none; padding: 0;'>
-                        <li><strong>Assunto:</strong> {ticket.Subject}</li>
-                        <li><strong>Descrição:</strong> {createTicket.Description}</li>
-                    </ul>
+                        
+                        <h2 style='color: #0056b3; text-align: center;'>Suporte ao Cliente</h2>
+                        
+                        
+                        <h3>Olá {ticket.ContactName}</h3>
+                        
+                      
+                        <p>Recebemos seu contato e um <strong>chamado de suporte</strong> foi aberto com sucesso! Nossa equipe está trabalhando para solucionar o seu problema o mais rápido possível.</p>
+                        
+                       
+                        <h3>Detalhes do Chamado:</h3>
+                        <ul style='list-style-type: none; padding: 0;'>
+                            <li><strong>Assunto:</strong> {ticket.Subject}</li>
+                            <li><strong>Descrição:</strong> {createTicket.Description}</li>
+                            <li><strong>Código do Chamado:</strong> #{code}</li>
+                            <li><strong>Data de Abertura:</strong> {DateTime.Now}</li>
+                        </ul>
+                        
+                       
+                        <h3>Contatos para Suporte:</h3>
+                        <p>Você também pode entrar em contato conosco pelos seguintes canais de atendimento:</p>
+                        <ul style='list-style-type: none; padding: 0;'>
+                            
+                            <li><strong>Email:</strong> suporte@atlasnetworks.com</li>
+                            <li><strong>WhatsApp:</strong> (11) 98765-4321</li>
+                            <li><strong>Horário de Atendimento:</strong> Segunda a Sexta, das 8h às 18h</li>
+                        </ul>
             
-                    <hr style='border: 0; border-top: 1px solid #eee;' />
-            
-                    <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
+                        
+                        <p style='font-size: 14px; color: #777;'>Atenciosamente,<br>Equipe de Suporte - AtlasNetworks</p>
+                        
+                        
+                        <hr style='border: 0; border-top: 1px solid #ddd; margin-top: 20px;' />
+                        <p style='font-size: 12px; color: #aaa; text-align: center;'>Este é um e-mail automático, por favor, não responda diretamente a esta mensagem.</p>
                 </body>
             </html>"
         );
@@ -211,16 +260,19 @@ public class TicketService
     public async Task<TicketDetailsDto> GetTicketDetailsAsync(Guid ticketId)
     {
         var ticket = await _ticketRepository.GetTicketWithDetailsAsync(ticketId);
-        if (ticket == null)
-        {
-            return null;
-        }
-
+        if (ticket is null) return null;
 
         var ticketDetailsDto = new TicketDetailsDto
         {
             Ticket = _mapper.Map<TicketDto>(ticket),
         };
+
+        foreach (var message in ticketDetailsDto.Ticket.Messages)
+        {
+            message.Attachments = ticketDetailsDto.Ticket.Attachments
+                .Where(a => a.TicketMessageId == message.Id)
+                .ToList();
+        }
 
         return ticketDetailsDto;
     }
