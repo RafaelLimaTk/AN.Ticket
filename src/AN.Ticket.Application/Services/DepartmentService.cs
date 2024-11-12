@@ -3,6 +3,8 @@ using AN.Ticket.Application.Helpers.Pagination;
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Application.Services.Base;
 using AN.Ticket.Domain.Entities;
+using AN.Ticket.Domain.EntityValidations;
+using AN.Ticket.Domain.Enums;
 using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Domain.Interfaces.Base;
 
@@ -63,5 +65,35 @@ public class DepartmentService : Service<DepartmentDto, Department>, IDepartment
             PageNumber = pageNumber,
             PageSize = pageSize
         };
+    }
+
+    public async Task<bool> CreateDepartmentAsync(DepartmentDto departmentDto)
+    {
+        var department = new Department(
+            departmentDto.Name,
+            departmentDto.Code,
+            departmentDto.Description,
+            departmentDto.Status
+        );
+
+        if (departmentDto.Members != null && departmentDto.Members.Any())
+        {
+            foreach (var memberDto in departmentDto.Members)
+            {
+                var departmentMember = memberDto.Type switch
+                {
+                    UserContactType.User => new DepartmentMember(department.Id, memberDto.Id, null),
+                    UserContactType.Contact => new DepartmentMember(department.Id, null, memberDto.Id),
+                    _ => throw new EntityValidationException("Tipo de usuário ou contato inválido.")
+                };
+                department.AddMember(departmentMember);
+                await _departmentMemberRepository.SaveAsync(departmentMember);
+            }
+        }
+
+        await _departmentRepository.SaveAsync(department);
+        await _unitOfWork.CommitAsync();
+
+        return true;
     }
 }

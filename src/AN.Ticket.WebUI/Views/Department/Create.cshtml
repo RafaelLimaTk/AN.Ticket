@@ -1,0 +1,174 @@
+﻿@model AN.Ticket.Application.DTOs.Department.DepartmentDto
+
+@{
+    bool isEdit = Model.Id != Guid.Empty;
+    ViewBag.Title = isEdit ? "Editar Departamento" : "Criar Departamento";
+}
+
+@await Component.InvokeAsync("Breadcrumb")
+
+<style>
+    .fixed-bottom {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        z-index: 1030;
+        background-color: white;
+        border-top: 1px solid #dee2e6;
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="@(isEdit ? "Edit" : "Create")" asp-controller="Department" method="post">
+                @if (isEdit)
+                {
+                    <input type="hidden" asp-for="Id" />
+                }
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="card mb-3">
+                    <div class="card-header">Informações do Departamento</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Nome</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Code" class="form-label">Código</label>
+                            <input asp-for="Code" class="form-control" />
+                            <span asp-validation-for="Code" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Descrição</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label">Status</label>
+                            <select asp-for="Status" class="form-select shadow-none">
+                                <option value="1">Ativo</option>
+                                <option value="2">Inativo</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hiddenMemberInputs"></div>
+
+                <div class="fixed-bottom text-end p-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi @(isEdit ? "bi-pencil" : "bi-plus")"></i> @(isEdit ? "Atualizar Departamento" : "Criar Departamento")
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Adicionar Funcionário</span>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addMemberToList()">Adicionar</button>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="memberSelect" class="form-label">Selecione o Funcionário</label>
+                        <select id="memberSelect" class="form-select">
+                            <option selected disabled>Escolha um funcionário</option>
+                            @foreach (var member in ViewBag.UserContacts)
+                            {
+                                <option value="@member.Id" data-fullname="@member.FullName" data-type="@member.Type">
+                                    @member.FullName
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Funcionários Selecionados</div>
+                <div class="card-body" id="selectedMembersContainer">
+                    <ul class="list-group" id="selectedMembersList">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const selectedMembers = [];
+
+        function addMemberToList() {
+            const memberSelect = document.getElementById("memberSelect");
+            const memberId = memberSelect.value;
+            const memberFullName = memberSelect.options[memberSelect.selectedIndex].getAttribute("data-fullname");
+            const memberType = memberSelect.options[memberSelect.selectedIndex].getAttribute("data-type");
+
+            if (selectedMembers.find(m => m.id === memberId)) {
+                toastr.error("Este funcionário já foi adicionado.");
+                return;
+            }
+
+            selectedMembers.push({ id: memberId, fullName: memberFullName, type: memberType });
+            updateSelectedMembersList();
+            updateHiddenFields();
+        }
+
+        function updateSelectedMembersList() {
+            const list = document.getElementById("selectedMembersList");
+            list.innerHTML = "";
+            selectedMembers.forEach(member => {
+                const listItem = document.createElement("li");
+                listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+                listItem.innerHTML = `${member.fullName}
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeMember('${member.id}')">
+                                <i class="bi bi-trash"></i> Remover
+                            </button>`;
+                list.appendChild(listItem);
+            });
+        }
+
+        function updateHiddenFields() {
+            const membersContainer = document.getElementById("hiddenMemberInputs");
+
+            membersContainer.innerHTML = "";
+
+            selectedMembers.forEach((member, index) => {
+                const idInput = document.createElement("input");
+                idInput.type = "hidden";
+                idInput.name = `Members[${index}].Id`;
+                idInput.value = member.id;
+
+                const fullNameInput = document.createElement("input");
+                fullNameInput.type = "hidden";
+                fullNameInput.name = `Members[${index}].FullName`;
+                fullNameInput.value = member.fullName;
+
+                const typeInput = document.createElement("input");
+                typeInput.type = "hidden";
+                typeInput.name = `Members[${index}].Type`;
+                typeInput.value = member.type;
+
+                membersContainer.appendChild(idInput);
+                membersContainer.appendChild(fullNameInput);
+                membersContainer.appendChild(typeInput);
+            });
+        }
+
+        function removeMember(memberId) {
+            const index = selectedMembers.findIndex(m => m.id === memberId);
+            if (index !== -1) {
+                selectedMembers.splice(index, 1);
+                updateSelectedMembersList();
+                updateHiddenFields();
+            }
+        }
+    </script>
+}
