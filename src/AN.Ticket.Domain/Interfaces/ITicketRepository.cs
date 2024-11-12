@@ -1,4 +1,4 @@
-﻿using AN.Ticket.Domain.Entities;
+﻿using AN.Ticket.Domain.DTOs;
 using AN.Ticket.Domain.Interfaces.Base;
 using DomainEntity = AN.Ticket.Domain.Entities;
 
@@ -15,7 +15,5 @@ public interface ITicketRepository : IRepository<DomainEntity.Ticket>
     Task<List<DomainEntity.Ticket>> GetTicketWithDetailsByUserAsync(Guid userId);
     Task<IEnumerable<DomainEntity.Ticket>> GetByContactEmailAsync(List<string> emails);
     Task<(int Total, int Onhold)> GetTicketAssocieteContactTotalAndOnhold(string contactEmail);
-
-    
-
+    Task<IEnumerable<ITicketCountUserDto>> GetUserTicketCountsAsync();
 }

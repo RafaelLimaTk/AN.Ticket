@@ -30,6 +30,7 @@ public class TicketService
     private readonly ISatisfactionRatingRepository _satisfactionRatingRepository;
     private readonly IEmailSenderService _emailSenderService;
     private readonly IAttachmentRepository _attachmentRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -42,6 +43,7 @@ public class TicketService
         ISatisfactionRatingRepository satisfactionRatingRepository,
         IEmailSenderService emailSenderService,
         IAttachmentRepository attachmentRepository,
+        IUserRepository userRepository,
         IMapper mapper,
         IUnitOfWork unitOfWork
     )
@@ -55,6 +57,7 @@ public class TicketService
         _satisfactionRatingRepository = satisfactionRatingRepository;
         _emailSenderService = emailSenderService;
         _attachmentRepository = attachmentRepository;
+        _userRepository = userRepository;
         _mapper = mapper;
         _unitOfWork = unitOfWork;
     }
@@ -688,6 +691,14 @@ public class TicketService
             AssignedTo = t.User?.FullName ?? "Não atribuído",
             RequestDate = t.CreatedAt
         });
+    }
+
+    public async Task<Guid> GetUserWithLeastTicketsAsync()
+    {
+        var technicianTicketCounts = await _ticketRepository.GetUserTicketCountsAsync();
+
+        var technicianWithLeastTickets = technicianTicketCounts.OrderBy(t => t.TicketCount).FirstOrDefault();
+        return technicianWithLeastTickets?.UserId ?? Guid.Empty;
     }
 
     private string GenerateSatisfactionRatingEmailContent(Guid ticketId)

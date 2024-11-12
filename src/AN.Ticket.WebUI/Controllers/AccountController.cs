@@ -1,5 +1,6 @@
 ﻿using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Domain.Entities;
+using AN.Ticket.Domain.Enums;
 using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Domain.Interfaces.Base;
 using AN.Ticket.Infra.Data.Identity;
@@ -154,10 +155,11 @@ public class AccountController : Controller
         }
 
         var user = new ApplicationUser(model.FullName, model.Email, model.Email, false, false);
-        var userEmployee = new User(Guid.Parse(user.Id), user.FullName!, user.Email!);
+        var userEmployee = new User(Guid.Parse(user.Id), user.FullName!, user.Email!, UserRole.User);
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {
+            await _userManager.AddToRoleAsync(user, "User");
             await _userRepository.SaveAsync(userEmployee);
             await _unitOfWork.CommitAsync();
 

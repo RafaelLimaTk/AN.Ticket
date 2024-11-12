@@ -4,6 +4,7 @@ using AN.Ticket.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AN.Ticket.Infra.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241112093106_AlterTable_AddColumn_Role_In_User")]
+    partial class AlterTable_AddColumn_Role_In_User
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -291,75 +294,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Contacts", (string)null);
-                });
-
-            modelBuilder.Entity("AN.Ticket.Domain.Entities.Department", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("Departments", (string)null);
-                });
-
-            modelBuilder.Entity("AN.Ticket.Domain.Entities.DepartmentMember", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid?>("ContactId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid>("DepartmentId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContactId");
-
-                    b.HasIndex("DepartmentId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("DepartmentMembers", (string)null);
                 });
 
             modelBuilder.Entity("AN.Ticket.Domain.Entities.InteractionHistory", b =>
@@ -994,31 +928,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AN.Ticket.Domain.Entities.DepartmentMember", b =>
-                {
-                    b.HasOne("AN.Ticket.Domain.Entities.Contact", "Contact")
-                        .WithMany("Departments")
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("AN.Ticket.Domain.Entities.Department", "Department")
-                        .WithMany("Members")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AN.Ticket.Domain.Entities.User", "User")
-                        .WithMany("Departments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("Contact");
-
-                    b.Navigation("Department");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("AN.Ticket.Domain.Entities.InteractionHistory", b =>
                 {
                     b.HasOne("AN.Ticket.Domain.Entities.Ticket", null)
@@ -1190,14 +1099,7 @@ namespace AN.Ticket.Infra.Data.Migrations
                 {
                     b.Navigation("AssetAssignments");
 
-                    b.Navigation("Departments");
-
                     b.Navigation("SocialNetworks");
-                });
-
-            modelBuilder.Entity("AN.Ticket.Domain.Entities.Department", b =>
-                {
-                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("AN.Ticket.Domain.Entities.Ticket", b =>
@@ -1216,8 +1118,6 @@ namespace AN.Ticket.Infra.Data.Migrations
             modelBuilder.Entity("AN.Ticket.Domain.Entities.User", b =>
                 {
                     b.Navigation("AssetAssignments");
-
-                    b.Navigation("Departments");
                 });
 #pragma warning restore 612, 618
         }

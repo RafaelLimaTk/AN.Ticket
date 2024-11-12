@@ -19,4 +19,5 @@ public interface ITicketService
     Task<List<TicketDto>> GetTicketWithDetailsByUserAsync(Guid userId);
     Task<SupportDashboardDto> GetSupportDashboardAsync(Guid userId, TicketFilterDto filters, int pageNumber, int pageSize, int activityPageNumber, int activityPageSize);
     Task<IEnumerable<TicketContactDetailsDto>> GetTicketsByContactIdAsync(List<string> emails, bool showAll);
+    Task<Guid> GetUserWithLeastTicketsAsync();
 }

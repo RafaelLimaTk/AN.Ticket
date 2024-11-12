@@ -25,6 +25,7 @@ public class EmailMonitoringService : IEmailMonitoringService
     private readonly IContactRepository _contactRepository;
     private readonly IEmailSenderService _emailSenderService;
     private readonly ITicketRepository _ticketRepository;
+    private readonly ITicketService _ticketService;
     private readonly ITicketMessageRepository _ticketMessageRepository;
     private readonly IAttachmentRepository _attachmentRepository;
     private readonly IChatGptService _chatGptService;
@@ -36,6 +37,7 @@ public class EmailMonitoringService : IEmailMonitoringService
         IContactRepository contactRepository,
         IEmailSenderService emailSenderService,
         ITicketRepository ticketRepository,
+        ITicketService ticketService,
         ITicketMessageRepository ticketMessageRepository,
         IAttachmentRepository attachmentRepository,
         IChatGptService chatGptService,
@@ -46,6 +48,7 @@ public class EmailMonitoringService : IEmailMonitoringService
         _contactRepository = contactRepository;
         _emailSenderService = emailSenderService;
         _ticketRepository = ticketRepository;
+        _ticketService = ticketService;
         _ticketMessageRepository = ticketMessageRepository;
         _attachmentRepository = attachmentRepository;
         _chatGptService = chatGptService;
@@ -198,6 +201,10 @@ public class EmailMonitoringService : IEmailMonitoringService
             );
 
             newTicket.AssignMessageId(messageId);
+
+            var userId = await _ticketService.GetUserWithLeastTicketsAsync();
+            if (userId != Guid.Empty)
+                newTicket.AssignUsers(userId);
 
             var messages = EmailParser.ParseEmailThread(body);
             messages.Select(msg => msg.TicketId = newTicket.Id);

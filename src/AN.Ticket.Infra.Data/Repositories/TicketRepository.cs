@@ -1,4 +1,5 @@
-﻿using AN.Ticket.Domain.Entities;
+﻿using AN.Ticket.Application.DTOs.Ticket;
+using AN.Ticket.Domain.DTOs;
 using AN.Ticket.Domain.Enums;
 using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Infra.Data.Context;
@@ -113,8 +114,25 @@ public class TicketRepository
            .CountAsync();
         var onHoldTickets = await Entities
             .AsNoTracking()
-            .Where(x => x.Email.Equals(contactEmail) && x.Status == TicketStatus.Onhold) // Substitua "OnHold" pela condição que define o ticket em aberto
+            .Where(x => x.Email.Equals(contactEmail) && x.Status == TicketStatus.Onhold)
             .CountAsync();
         return (totalTickets, onHoldTickets);
+    }
+
+    public async Task<IEnumerable<ITicketCountUserDto>> GetUserTicketCountsAsync()
+    {
+        return await Entities
+            .AsNoTracking()
+            .Where(t =>
+                t.Status == TicketStatus.Onhold ||
+                t.Status == TicketStatus.Open
+            )
+            .GroupBy(t => t.UserId)
+            .Select(g => new TicketCountUserDto
+            {
+                UserId = g.Key.Value,
+                TicketCount = g.Count()
+            })
+            .ToListAsync();
     }
 }

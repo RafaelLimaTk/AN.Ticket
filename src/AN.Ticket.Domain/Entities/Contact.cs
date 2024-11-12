@@ -20,10 +20,12 @@ public class Contact : EntityBase
 
     public User User { get; set; }
     public ICollection<AssetAssignment> AssetAssignments { get; private set; }
+    public ICollection<DepartmentMember> Departments { get; private set; }
 
     protected Contact()
     {
         AssetAssignments = new List<AssetAssignment>();
+        Departments = new List<DepartmentMember>();
     }
 
     public Contact(
