@@ -14,6 +14,8 @@ using AN.Ticket.Domain.Interfaces.Base;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using MimeKit;
+using MimeKit.Utils;
 using System.Globalization;
 using System.Text;
 using DomainEntity = AN.Ticket.Domain.Entities;
@@ -140,26 +142,32 @@ public class TicketService
         //        </body>
         //    </html>"
         //);
+        // Definindo os caminhos das imagens de acordo com o status
+        string imagePathOnHold = ticket.Status == TicketStatus.Onhold ? "wwwroot/img/status/onhold-on.png" : "wwwroot/img/status/onhold-off.png";
+        string imagePathOpen = ticket.Status == TicketStatus.Open ? "wwwroot/img/status/open-on.png" : "wwwroot/img/status/open-off.png";
+        string imagePathInProgress = ticket.Status == TicketStatus.InProgress ? "wwwroot/img/status/progress-on.png" : "wwwroot/img/status/progress-off.png";
+        string imagePathClosed = ticket.Status == TicketStatus.Closed ? "wwwroot/img/status/close-on.png" : "wwwroot/img/status/close-off.png";
 
-        await _emailSenderService.SendEmailAsync(
-            ticket.Email,
-            ticket.Subject,
-            $@"
+        var imageBytesOnHold = File.ReadAllBytes(imagePathOnHold);
+        var imageBytesOpen = File.ReadAllBytes(imagePathOpen);
+        var imageBytesInProgress = File.ReadAllBytes(imagePathInProgress);
+        var imageBytesClosed = File.ReadAllBytes(imagePathClosed);
+
+        // Gerando os CIDs das imagens
+        var imageCidOnHold = MimeUtils.GenerateMessageId();
+        var imageCidOpen = MimeUtils.GenerateMessageId();
+        var imageCidInProgress = MimeUtils.GenerateMessageId();
+        var imageCidClosed = MimeUtils.GenerateMessageId();
+
+        // Conteúdo do email com a imagem embutida
+        string htmlContent = $@"
             <html>
-                
                 <body>
                     <div style='max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f9f9f9;'>
-            
-                        
                         <h2 style='color: #0056b3; text-align: center;'>Suporte ao Cliente</h2>
-                        
-                        
                         <h3>Olá {ticket.ContactName}</h3>
-                        
-                      
                         <p>Recebemos seu contato e um <strong>chamado de suporte</strong> foi aberto com sucesso! Nossa equipe está trabalhando para solucionar o seu problema o mais rápido possível.</p>
                         
-                       
                         <h3>Detalhes do Chamado:</h3>
                         <ul style='list-style-type: none; padding: 0;'>
                             <li><strong>Assunto:</strong> {ticket.Subject}</li>
@@ -167,27 +175,88 @@ public class TicketService
                             <li><strong>Código do Chamado:</strong> #{code}</li>
                             <li><strong>Data de Abertura:</strong> {DateTime.Now}</li>
                         </ul>
-                        
-                       
+
                         <h3>Contatos para Suporte:</h3>
                         <p>Você também pode entrar em contato conosco pelos seguintes canais de atendimento:</p>
                         <ul style='list-style-type: none; padding: 0;'>
-                            
                             <li><strong>Email:</strong> suporte@atlasnetworks.com</li>
                             <li><strong>WhatsApp:</strong> (11) 98765-4321</li>
                             <li><strong>Horário de Atendimento:</strong> Segunda a Sexta, das 8h às 18h</li>
                         </ul>
-            
-                        
+                        <div style='display: flex; align-items: center; justify-content: space-between; margin-top: 20px; position: relative;'>
+                            <!-- Linha tracejada -->
+                            <div style='position: absolute; top: 50%; left: 0; right: 0; border-top: 1px dashed #aaa; transform: translateY(-50%);'></div>
+                            
+                            <!-- Status: Em espera -->
+                            <div style='text-align: center; color: {(ticket.Status == TicketStatus.Onhold ? "#0056b3" : "#aaa")}; background-color: #fff; padding: 0 5px; z-index: 1;'>
+                                <img src='cid:{imageCidOnHold}' alt='Status Image' style='display: block; margin: auto; width: 50px;' />
+                                <p style='margin-top: 5px;'>Em espera</p>
+                            </div>
+                            
+                            <!-- Status: Aberto -->
+                            <div style='text-align: center; color: {(ticket.Status == TicketStatus.Open ? "#0056b3" : "#aaa")}; background-color: #fff; padding: 0 5px; z-index: 1;'>
+                                <img src='cid:{imageCidOpen}' alt='Status Image' style='display: block; margin: auto; width: 50px;' />
+                                <p style='margin-top: 5px;'>Aberto</p>
+                            </div>
+                            
+                            <!-- Status: Em progresso -->
+                            <div style='text-align: center; color: {(ticket.Status == TicketStatus.InProgress ? "#0056b3" : "#aaa")}; background-color: #fff; padding: 0 5px; z-index: 1;'>
+                                <img src='cid:{imageCidInProgress}' alt='Status Image' style='display: block; margin: auto; width: 50px;' />
+                                <p style='margin-top: 5px;'>Em progresso</p>
+                            </div>
+                            
+                            <!-- Status: Fechado -->
+                            <div style='text-align: center; color: {(ticket.Status == TicketStatus.Closed ? "#0056b3" : "#aaa")}; background-color: #fff; padding: 0 5px; z-index: 1;'>
+                                <img src='cid:{imageCidClosed}' alt='Status Image' style='display: block; margin: auto; width: 50px;' />
+                                <p style='margin-top: 5px;'>Fechado</p>
+                            </div>
+                        </div>
+
                         <p style='font-size: 14px; color: #777;'>Atenciosamente,<br>Equipe de Suporte - AtlasNetworks</p>
-                        
-                        
+
                         <hr style='border: 0; border-top: 1px solid #ddd; margin-top: 20px;' />
                         <p style='font-size: 12px; color: #aaa; text-align: center;'>Este é um e-mail automático, por favor, não responda diretamente a esta mensagem.</p>
+                        
+                    </div>
                 </body>
-            </html>"
+            </html>";
+        var imageMimeParts = new List<MimePart>
+        {
+            new MimePart("image", "png")
+            {
+                Content = new MimeContent(new MemoryStream(imageBytesOnHold)),
+                ContentId = imageCidOnHold,
+                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                ContentTransferEncoding = ContentEncoding.Base64
+            },
+            new MimePart("image", "png")
+            {
+                Content = new MimeContent(new MemoryStream(imageBytesOpen)),
+                ContentId = imageCidOpen,
+                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                ContentTransferEncoding = ContentEncoding.Base64
+            },
+            new MimePart("image", "png")
+            {
+                Content = new MimeContent(new MemoryStream(imageBytesInProgress)),
+                ContentId = imageCidInProgress,
+                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                ContentTransferEncoding = ContentEncoding.Base64
+            },
+            new MimePart("image", "png")
+            {
+                Content = new MimeContent(new MemoryStream(imageBytesClosed)),
+                ContentId = imageCidClosed,
+                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                ContentTransferEncoding = ContentEncoding.Base64
+            }
+        };
+        await _emailSenderService.SendEmailAsync(
+            ticket.Email,
+            ticket.Subject,
+            htmlContent,
+            imageMimeParts
         );
-
         return true;
     }
 

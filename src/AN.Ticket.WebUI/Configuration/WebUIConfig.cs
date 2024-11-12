@@ -71,6 +71,7 @@ public static class WebUIConfig
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseHangfireConfiguration(configuration);
+        app.UseStaticFiles(); // Para servir arquivos estáticos
 
         //HangfireJobsConfig.ConfigureRecurringJobs(configuration);
 
