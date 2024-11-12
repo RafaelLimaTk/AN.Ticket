@@ -1,0 +1,119 @@
+﻿@using AN.Ticket.Domain.Enums
+@model AN.Ticket.WebUI.ViewModels.Department.DepartmentListViewModel
+
+<div class="container my-4">
+    <div class="mb-3">
+        <h1 class="h4">Gerenciamento de Departamentos</h1>
+        <p class="text-muted">Gerencie seus departamentos e suas informações aqui.</p>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex">
+            <button class="btn btn-outline-secondary me-2" onclick="applyFilter()">
+                <i class="bi bi-funnel"></i> Filtro
+            </button>
+            <button class="btn btn-outline-secondary" onclick="sortDepartments()">
+                <i class="bi bi-sort"></i> Ordenar
+            </button>
+        </div>
+        <a href="/Department/Create" class="btn btn-primary"><i class="bi bi-plus"></i> Adicionar Departamento</a>
+    </div>
+
+    @if (!Model.Departments.Any())
+    {
+        <div class="alert alert-primary text-center" role="alert">
+            Nenhum departamento cadastrado no momento.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var department in Model.Departments)
+            {
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">@department.Name</h5>
+                                <span class="badge bg-@(department.Status == DepartmentStatus.Active ? "dark" : "secondary")">@department.Status</span>
+                            </div>
+                            <p class="text-muted mb-2">@department.Description</p>
+
+                            <div class="d-flex align-items-center mt-3">
+                                @foreach (var member in department.Members.Take(6))
+                                {
+                                    <div class="profile-avatar rounded-circle overflow-hidden border border-light me-2" style="width: 35px; height: 35px;">
+                                        @if (!string.IsNullOrEmpty(member.ProfilePictureUrl))
+                                        {
+                                            <img src="@member.ProfilePictureUrl" alt="@member.FullName" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <span class="d-flex justify-content-center align-items-center h-100 text-uppercase fw-bold" style="background-color: #f0f0f0; color: #555;">
+                                                @member.FullName.Substring(0, 2)
+                                            </span>
+                                        }
+                                    </div>
+                                }
+                                @if (department.Members.Count > 3)
+                                {
+                                    <span class="text-muted">+ @(department.Members.Count - 3)</span>
+                                }
+                            </div>
+
+                            <p class="text-muted mt-3 mb-0">
+                                <i class="bi bi-people-fill"></i> @department.MembersCount membros
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+            <span class="text-muted">Mostrando @((Model.PageNumber - 1) * Model.PageSize + 1) a @(Model.PageNumber * Model.PageSize) de @Model.TotalItems departamentos</span>
+        </div>
+
+        @if (Model.TotalItems > Model.PageSize)
+        {
+            <nav aria-label="Navegação de página">
+                <ul class="pagination mb-0">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?pageNumber=@(Model.PageNumber - 1)&pageSize=@Model.PageSize&searchTerm=@Model.SearchTerm">Anterior</a>
+                        </li>
+                    }
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(Model.PageNumber == i ? "active" : "")">
+                            <a class="page-link" href="?pageNumber=@i&pageSize=@Model.PageSize&searchTerm=@Model.SearchTerm">@i</a>
+                        </li>
+                    }
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?pageNumber=@(Model.PageNumber + 1)&pageSize=@Model.PageSize&searchTerm=@Model.SearchTerm">Próximo</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function applyFilter() {
+            var searchTerm = document.getElementById('searchTerm').value;
+            var url = '@Url.Action("Index", new { pageNumber = 1, pageSize = Model.PageSize })';
+            window.location.href = url + '&searchTerm=' + encodeURIComponent(searchTerm);
+        }
+
+        function sortDepartments() {
+            // Adicione a lógica para ordenar os departamentos, se necessário
+        }
+    </script>
+}
