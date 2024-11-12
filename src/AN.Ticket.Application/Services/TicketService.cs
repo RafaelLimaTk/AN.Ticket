@@ -183,34 +183,40 @@ public class TicketService
                             <li><strong>WhatsApp:</strong> (11) 98765-4321</li>
                             <li><strong>Horário de Atendimento:</strong> Segunda a Sexta, das 8h às 18h</li>
                         </ul>
-                        <div style='display: flex; align-items: center; justify-content: space-between; margin-top: 20px; position: relative;'>
+                       <div style='margin-top: 20px; position: relative; text-align: center;'>
                             <!-- Linha tracejada -->
                             <div style='position: absolute; top: 50%; left: 0; right: 0; border-top: 1px dashed #aaa; transform: translateY(-50%);'></div>
                             
-                            <!-- Status: Em espera -->
-                            <div style='text-align: center; color: {(ticket.Status == TicketStatus.Onhold ? "#0056b3" : "#aaa")}; background-color: #fff; padding: 0 5px; z-index: 1;'>
-                                <img src='cid:{imageCidOnHold}' alt='Status Image' style='display: block; margin: auto; width: 50px;' />
-                                <p style='margin-top: 5px;'>Em espera</p>
-                            </div>
-                            
-                            <!-- Status: Aberto -->
-                            <div style='text-align: center; color: {(ticket.Status == TicketStatus.Open ? "#0056b3" : "#aaa")}; background-color: #fff; padding: 0 5px; z-index: 1;'>
-                                <img src='cid:{imageCidOpen}' alt='Status Image' style='display: block; margin: auto; width: 50px;' />
-                                <p style='margin-top: 5px;'>Aberto</p>
-                            </div>
-                            
-                            <!-- Status: Em progresso -->
-                            <div style='text-align: center; color: {(ticket.Status == TicketStatus.InProgress ? "#0056b3" : "#aaa")}; background-color: #fff; padding: 0 5px; z-index: 1;'>
-                                <img src='cid:{imageCidInProgress}' alt='Status Image' style='display: block; margin: auto; width: 50px;' />
-                                <p style='margin-top: 5px;'>Em progresso</p>
-                            </div>
-                            
-                            <!-- Status: Fechado -->
-                            <div style='text-align: center; color: {(ticket.Status == TicketStatus.Closed ? "#0056b3" : "#aaa")}; background-color: #fff; padding: 0 5px; z-index: 1;'>
-                                <img src='cid:{imageCidClosed}' alt='Status Image' style='display: block; margin: auto; width: 50px;' />
-                                <p style='margin-top: 5px;'>Fechado</p>
-                            </div>
+                            <!-- Tabela para alinhar os ícones e textos -->
+                            <table style='width: 100%; z-index: 1; position: relative; background-color: #fff;'>
+                                <tr>
+                                    <!-- Status: Em espera -->
+                                    <td style='text-align: center; color: #aaa; padding: 0 10px;'>
+                                        <img src='cid:{imageCidOnHold}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Em espera</p>
+                                    </td>
+
+                                    <!-- Status: Aberto -->
+                                    <td style='text-align: center; color: #aaa; padding: 0 10px;'>
+                                        <img src='cid:{imageCidOpen}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Aberto</p>
+                                    </td>
+
+                                    <!-- Status: Em progresso -->
+                                    <td style='text-align: center; color: #aaa; padding: 0 10px;'>
+                                        <img src='cid:{imageCidInProgress}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Em progresso</p>
+                                    </td>
+
+                                    <!-- Status: Fechado -->
+                                    <td style='text-align: center; color: #aaa; padding: 0 10px;'>
+                                        <img src='cid:{imageCidClosed}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Fechado</p>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
+
 
                         <p style='font-size: 14px; color: #777;'>Atenciosamente,<br>Equipe de Suporte - AtlasNetworks</p>
 
