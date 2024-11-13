@@ -60,7 +60,23 @@ public class TicketService
         _mapper = mapper;
         _unitOfWork = unitOfWork;
     }
+    public async Task<byte[]> GetImageBytesAsync(string relativePath)
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            var imageUrl = _baseUrlSettings.BaseUrl + relativePath;
+            var response = await client.GetAsync(imageUrl);
 
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsByteArrayAsync();
+            }
+            else
+            {
+                throw new Exception("Image not found at URL: " + imageUrl);
+            }
+        }
+    }
     public async Task<bool> CreateTicketAsync(CreateTicketDto createTicket)
     {
         var ticket = new DomainEntity.Ticket(
@@ -142,16 +158,15 @@ public class TicketService
         //        </body>
         //    </html>"
         //);
-        // Definindo os caminhos das imagens de acordo com o status
-        string imagePathOnHold = ticket.Status == TicketStatus.Onhold ? "wwwroot/img/status/onhold-on.png" : "wwwroot/img/status/onhold-off.png";
-        string imagePathOpen = ticket.Status == TicketStatus.Open ? "wwwroot/img/status/open-on.png" : "wwwroot/img/status/open-off.png";
-        string imagePathInProgress = ticket.Status == TicketStatus.InProgress ? "wwwroot/img/status/progress-on.png" : "wwwroot/img/status/progress-off.png";
-        string imagePathClosed = ticket.Status == TicketStatus.Closed ? "wwwroot/img/status/close-on.png" : "wwwroot/img/status/close-off.png";
+        string imagePathOnHold = ticket.Status == TicketStatus.Onhold ? "/img/status/onhold-on.png" : "/img/status/onhold-off.png";
+        string imagePathOpen = ticket.Status == TicketStatus.Open ? "/img/status/open-on.png" : "/img/status/open-off.png";
+        string imagePathInProgress = ticket.Status == TicketStatus.InProgress ? "/img/status/progress-on.png" : "/img/status/progress-off.png";
+        string imagePathClosed = ticket.Status == TicketStatus.Closed ? "/img/status/close-on.png" : "/img/status/close-off.png";
 
-        var imageBytesOnHold = File.ReadAllBytes(imagePathOnHold);
-        var imageBytesOpen = File.ReadAllBytes(imagePathOpen);
-        var imageBytesInProgress = File.ReadAllBytes(imagePathInProgress);
-        var imageBytesClosed = File.ReadAllBytes(imagePathClosed);
+        var imageBytesOnHold = await GetImageBytesAsync(imagePathOnHold);
+        var imageBytesOpen = await GetImageBytesAsync(imagePathOpen);
+        var imageBytesInProgress = await GetImageBytesAsync(imagePathInProgress);
+        var imageBytesClosed = await GetImageBytesAsync(imagePathClosed);
 
         // Gerando os CIDs das imagens
         var imageCidOnHold = MimeUtils.GenerateMessageId();
@@ -159,7 +174,6 @@ public class TicketService
         var imageCidInProgress = MimeUtils.GenerateMessageId();
         var imageCidClosed = MimeUtils.GenerateMessageId();
 
-        // Conteúdo do email com a imagem embutida
         string htmlContent = $@"
             <html>
                 <body>
