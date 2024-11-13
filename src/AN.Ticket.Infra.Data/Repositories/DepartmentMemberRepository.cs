@@ -19,10 +19,17 @@ public class DepartmentMemberRepository : Repository<DepartmentMember>, IDepartm
             .Where(dm => dm.DepartmentId == departmentId)
             .Select(dm => new DepartmentMemberDto
             {
-                Id = dm.Id,
+                Id = dm.UserId ?? dm.ContactId ?? Guid.Empty,
                 FullName = dm.User != null ? dm.User.FullName : dm.Contact != null ? dm.Contact.GetFullName() : string.Empty,
                 ProfilePictureUrl = dm.User != null ? dm.User.ProfilePicture : string.Empty,
             })
+            .ToListAsync();
+    }
+
+    public async Task<List<DepartmentMember>> GetByDepartmentIdAsync(Guid departmentId)
+    {
+        return await Entities
+            .Where(dm => dm.DepartmentId == departmentId)
             .ToListAsync();
     }
 }

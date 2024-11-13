@@ -4,5 +4,5 @@ using AN.Ticket.Domain.Interfaces.Base;
 namespace AN.Ticket.Domain.Interfaces;
 public interface IDepartmentRepository : IRepository<Department>
 {
-    Task<(IEnumerable<Department> Items, int TotalCount)> GetPaginatedDepartmentsAsync(int pageNumber, int pageSize, string searchTerm = "");
+    Task<(IEnumerable<Department> Items, int TotalCount)> GetPaginatedDepartmentsAsync(int pageNumber, int pageSize, string searchTerm = "", int? status = null, string memberOrder = "");
 }

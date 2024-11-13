@@ -42,4 +42,15 @@ public class Department : EntityBase
     {
         Members.Remove(member);
     }
+
+    public void UpdateDepartment(string name, string code, string description, DepartmentStatus status)
+    {
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException("Nome do departamento é obrigatório", nameof(name));
+        if (string.IsNullOrWhiteSpace(code)) throw new ArgumentNullException("Código do departamento é obrigatório", nameof(code));
+
+        Name = name;
+        Code = code;
+        Description = description;
+        Status = status;
+    }
 }

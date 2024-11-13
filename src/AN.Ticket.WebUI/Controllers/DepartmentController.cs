@@ -4,6 +4,7 @@ using AN.Ticket.Domain.Enums;
 using AN.Ticket.WebUI.ViewModels.Asset;
 using AN.Ticket.WebUI.ViewModels.Department;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AN.Ticket.WebUI.Controllers;
 public class DepartmentController : Controller
@@ -24,9 +25,24 @@ public class DepartmentController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10, string searchTerm = "")
+    public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10, string searchTerm = "", int? status = null, string memberOrder = "")
     {
-        var paginatedDepartments = await _departmentService.GetPaginatedDepartmentsAsync(pageNumber, pageSize, searchTerm);
+        var paginatedDepartments = await _departmentService.GetPaginatedDepartmentsAsync(pageNumber, pageSize, searchTerm, status, memberOrder);
+
+        ViewBag.StatusOptions = new SelectList(new List<SelectListItem>
+        {
+            new SelectListItem { Text = "Todos", Value = "", Selected = status == null },
+            new SelectListItem { Text = "Ativo", Value = "1", Selected = status == 1 },
+            new SelectListItem { Text = "Inativo", Value = "2", Selected = status == 2 }
+        }, "Value", "Text", status?.ToString());
+
+        ViewBag.MemberOrderOptions = new SelectList(new List<SelectListItem>
+        {
+            new SelectListItem { Text = "Nenhum", Value = "", Selected = string.IsNullOrEmpty(memberOrder) },
+            new SelectListItem { Text = "Menor para Maior", Value = "asc", Selected = memberOrder == "asc" },
+            new SelectListItem { Text = "Maior para Menor", Value = "desc", Selected = memberOrder == "desc" }
+        }, "Value", "Text", memberOrder);
+
 
         return View(new DepartmentListViewModel
         {
@@ -72,6 +88,90 @@ public class DepartmentController : Controller
             ViewBag.UserContacts = await GetUserContactsAsync();
             return View(model);
         }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            TempData["ErrorMessage"] = "ID do departamento inválido.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var department = await _departmentService.GetByIdAsync(id);
+
+        if (department is null)
+        {
+            TempData["ErrorMessage"] = "Departamento não encontrado.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var departmentMembers = await _departmentService.GetMembersByDepartmentIdAsync(id);
+        var departmentDto = new DepartmentDto
+        {
+            Id = department.Id,
+            Name = department.Name,
+            Code = department.Code,
+            Description = department.Description,
+            Status = department.Status,
+            Members = departmentMembers.Select(member => new DepartmentMemberDto
+            {
+                Id = member.Id,
+                FullName = member.FullName,
+                Type = member.Type
+            }).ToList()
+        };
+
+        ViewBag.UserContacts = await GetUserContactsAsync();
+
+        return View(nameof(Create), departmentDto);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(DepartmentDto model)
+    {
+        if (!ModelState.IsValid)
+        {
+            ViewBag.UserContacts = await GetUserContactsAsync();
+            return View(nameof(Create), model);
+        }
+
+        try
+        {
+            await _departmentService.UpdateDepartmentAsync(model);
+            TempData["SuccessMessage"] = "Departamento atualizado com sucesso!";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Erro ao atualizar o departamento: {ex.Message}";
+            ViewBag.UserContacts = await GetUserContactsAsync();
+            return View(nameof(Create), model);
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            TempData["ErrorMessage"] = "ID do departamento inválido.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        try
+        {
+            await _departmentService.DeleteDepartmentAsync(id);
+            TempData["SuccessMessage"] = "Departamento excluído com sucesso!";
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Erro ao excluir o departamento: {ex.Message}";
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 
     private async Task<List<UserContactDto>> GetUserContactsAsync()
