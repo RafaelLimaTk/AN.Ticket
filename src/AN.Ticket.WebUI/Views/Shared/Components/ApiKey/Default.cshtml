@@ -1,0 +1,68 @@
+﻿@model AN.Ticket.WebUI.ViewModels.Setting.ApiKeyViewModel
+
+<div class="card p-4 mb-4">
+    <h4>Configurações da API</h4>
+    <p class="text-muted">
+        A chave da API do ChatGPT permite a integração direta com os serviços da OpenAI. Insira a chave abaixo e
+        garanta que ela seja mantida segura. Apenas usuários com permissões administrativas podem copiar ou visualizar a chave.
+    </p>
+
+    <form asp-controller="ApiKey" asp-action="SaveApiKey" method="post">
+        <div class="form-group position-relative">
+            <div class="input-group">
+                <input type="text" asp-for="ApiKey" class="form-control" id="apiKeyInput" placeholder="Digite sua API Key" />
+                <button type="button" id="toggleVisibility" class="btn btn-outline-secondary" onclick="toggleVisibility()">
+                    <i class="bi bi-eye"></i>
+                </button>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <button type="button" id="copyButton" class="btn btn-outline-secondary" onclick="copyApiKey()">
+                        <i class="bi bi-clipboard"></i> Copiar
+                    </button>
+                }
+            </div>
+            <span asp-validation-for="ApiKey" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-dark mt-3">Salvar</button>
+    </form>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mt-2">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger mt-2">@TempData["ErrorMessage"]</div>
+    }
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        apiKeyInput.type = 'password';
+    });
+
+    window.toggleVisibility = function () {
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const icon = document.getElementById('toggleVisibility').firstElementChild;
+        if (apiKeyInput.type === 'password') {
+            apiKeyInput.type = 'text';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            apiKeyInput.type = 'password';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    }
+
+    window.copyApiKey = function () {
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        apiKeyInput.type = 'text';
+        navigator.clipboard.writeText(apiKeyInput.value).then(() => {
+            toastr.success('API Key copiada com sucesso!');
+            apiKeyInput.type = 'password';
+        });
+    }
+</script>
+

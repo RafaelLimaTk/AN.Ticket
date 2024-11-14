@@ -12,6 +12,30 @@ public class UserRepository
         : base(context)
     { }
 
+    public async Task<(IEnumerable<User> Items, int TotalCount)> GetPaginatedUsersAsync(
+        int pageNumber,
+        int pageSize,
+        string searchTerm = ""
+    )
+    {
+        var query = Entities.AsQueryable();
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query = query.Where(u => u.FullName.Contains(searchTerm) || u.Email.Contains(searchTerm));
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderBy(u => u.FullName)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<IEnumerable<User>> GetAllByIds(List<Guid> ids)
     {
         return await Entities

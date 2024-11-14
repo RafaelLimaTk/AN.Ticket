@@ -188,6 +188,24 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
+                       data-bs-target="#appFeaturesUser" aria-expanded="false" aria-controls="appFeaturesUser">
+                        <i class="bi bi-person-badge"></i>
+                        <span class="ms-2">Usuário</span>
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <div class="collapse" id="appFeaturesUser">
+                        <ul class="navbar-nav ps-3">
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="User" asp-action="Index"><i class="bi bi-person-lines-fill me-1"></i>Gerenciar Usuários</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="User" asp-action="Create"><i class="bi bi-person-plus me-1"></i>Cadastrar Usuário</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
                         data-bs-target="#financeMenu" aria-expanded="false" aria-controls="financeMenu">
                         <i class="bi bi-currency-dollar"></i>
                         <span class="ms-2">Relatório</span>

@@ -51,4 +51,6 @@ public class ActivityDto
     public TicketDto? Ticket { get; set; }
 
     public bool IsEditTicket { get; set; }
+
+    public bool IsScreenTicket { get; set; }
 }

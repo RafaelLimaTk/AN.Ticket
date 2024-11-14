@@ -1,0 +1,37 @@
+﻿@model Guid
+
+<span class="dropdown">
+    <button class="btn btn-link bg-white text-secondary border" type="button" id="dropdownMenuButton-@Model" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-three-dots"></i>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@Model">
+        <li>
+            <a class="dropdown-item" asp-action="Edit" asp-controller="User" asp-route-id="@Model">
+                <i class="bi bi-pencil-square"></i> Editar
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal-@Model">
+                <i class="bi bi-trash"></i> Excluir
+            </a>
+        </li>
+    </ul>
+</span>
+
+<div class="modal fade" id="deleteModal-@Model" tabindex="-1" aria-labelledby="deleteModalLabel-@Model" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel-@Model">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-start">
+                Tem certeza que deseja excluir este usuário?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a class="btn btn-danger" asp-action="Delete" asp-controller="User" asp-route-id="@Model">Excluir</a>
+            </div>
+        </div>
+    </div>
+</div>

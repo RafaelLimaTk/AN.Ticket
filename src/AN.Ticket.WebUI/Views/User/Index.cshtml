@@ -1,0 +1,235 @@
+﻿@using AN.Ticket.Domain.Enums
+@model AN.Ticket.WebUI.ViewModels.User.UserListViewModel
+
+@{
+    ViewData["Title"] = "Gerenciamento de Usuários";
+}
+
+@await Component.InvokeAsync("Breadcrumb")
+
+<div class="container mt-4">
+    <div class="mb-3">
+        <h1 class="h4">Gerenciamento de Usuários</h1>
+        <p class="text-muted">Gerencie seus usuários e suas informações aqui.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-3">
+            <!-- Responsividade para desktop -->
+            <div class="d-none d-md-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-muted">Todos os usuários @Model.TotalItems</h6>
+                <div class="d-flex align-items-center">
+                    <div class="input-group me-2" style="width: 300px;">
+                        <input type="text" class="form-control" placeholder="Pesquisar" value="@Model.SearchTerm" id="searchTerm">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    </div>
+                    <a href="@Url.Action("Create", "User")" class="btn btn-dark px-4">+ Adicionar usuário</a>
+                    <button id="deleteSelectedBtn" class="btn btn-outline-danger ms-2 px-4" style="height: 40px; display: none;" onclick="deleteSelected()">
+                        <i class="bi bi-trash"></i> Excluir Selecionados
+                    </button>
+                </div>
+            </div>
+
+            <!-- Responsividade para mobile -->
+            <div class="d-flex d-md-none row mb-3 align-items-center">
+                <div class="col-md-6">
+                    <h6 class="text-muted">Todos os usuários @Model.TotalItems</h6>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Pesquisar" value="@Model.SearchTerm" id="searchTerm">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mt-2">
+                            <button class="btn btn-outline-secondary w-100" onclick="applyFilter()">
+                                <i class="bi bi-funnel"></i> Filtros
+                            </button>
+                        </div>
+                        <div class="col-md-3 mt-2">
+                            <a href="@Url.Action("Create", "User")" class="btn btn-dark w-100">+ Adicionar usuário</a>
+                        </div>
+                        <div class="col-md-2 mt-2">
+                            <button id="deleteSelectedBtn" class="btn btn-outline-danger w-100" style="display: none;" onclick="deleteSelected()">
+                                <i class="bi bi-trash"></i> Excluir Selecionados
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="DeleteUsers" method="post" id="deleteForm">
+                @Html.AntiForgeryToken()
+                <table class="table table-borderless table-hover align-middle mb-0">
+                    <thead style="background-color: #F4F5F7; border-radius: 10px 10px 0 0;">
+                        <tr style="border-radius: 10px; background-color: #F4F5F7;">
+                            <th scope="col" style="width: 1%; border-top-left-radius: 10px;">
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th scope="col" style="width: 5%;">Foto</th>
+                            <th scope="col" style="width: 20%;">Nome</th>
+                            <th scope="col" style="width: 20%;">Email</th>
+                            <th scope="col" class="d-none d-md-table-cell" style="width: 15%;">Função</th>
+                            <th scope="col" class="d-none d-md-table-cell" style="width: 15%;">Criado em</th>
+                            <th scope="col" style="width: 10%; border-top-right-radius: 10px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr style="border-bottom: 1px solid #E0E0E0;">
+                                <td>
+                                    <input type="checkbox" class="selectUser" name="ids" value="@user.Id">
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(user.ProfilePicture))
+                                    {
+                                        <img src="@user.ProfilePicture" alt="Foto de @user.FullName" class="rounded-circle" width="40" height="40" />
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-circle bg-success text-white" style="height: 40px; width: 40px; display: flex; align-items: center; justify-content: center;">
+                                            @GetInitials(user.FullName)
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@user.FullName</div>
+                                </td>
+                                <td>
+                                    <div>@user.Email</div>
+                                </td>
+                                <td class="d-none d-md-table-cell">
+                                    <span class="badge @(GetRoleBadgeClass(user.Role))">@TranslateUserRole(user.Role)</span>
+                                </td>
+                                <td class="d-none d-md-table-cell">
+                                    @user.CreatedAt.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>
+                                    @await Html.PartialAsync("~/Views/Shared/Partials/User/_UserActionsDropdown.cshtml", user.Id)
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+            <span class="text-muted">Mostrando @((Model.PageNumber - 1) * Model.PageSize + 1) a @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalItems)) de @Model.TotalItems entradas</span>
+        </div>
+        @if (Model.TotalItems > Model.PageSize)
+        {
+            <nav aria-label="Navegação de página">
+                <ul class="pagination mb-0">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    }
+                    @for (var i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { pageNumber = i, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })">@i</a>
+                        </li>
+                    }
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Próximo">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    </div>
+</div>
+
+@functions {
+    public string TranslateUserRole(UserRole role)
+    {
+        return role switch
+        {
+            UserRole.Admin => "Administrador",
+            UserRole.User => "Usuário",
+            UserRole.Support => "Suporte",
+            _ => role.ToString(),
+        };
+    }
+
+    public string GetRoleBadgeClass(UserRole role)
+    {
+        return role switch
+        {
+            UserRole.Admin => "bg-danger",
+            UserRole.Support => "bg-warning",
+            UserRole.User => "bg-primary",
+            _ => "bg-secondary"
+        };
+    }
+
+    public static string GetInitials(string fullName)
+    {
+        if (string.IsNullOrEmpty(fullName))
+            return string.Empty;
+
+        var names = fullName.Split(' ');
+        if (names.Length == 1)
+            return names[0].Substring(0, 1).ToUpper();
+
+        return (names[0].Substring(0, 1) + names[names.Length - 1].Substring(0, 1)).ToUpper();
+    }
+}
+
+@section Scripts {
+    <script>
+        document.getElementById('selectAll').addEventListener('change', function () {
+            var checkboxes = document.querySelectorAll('.selectUser');
+            var selectAll = this.checked;
+            checkboxes.forEach(function (checkbox) {
+                checkbox.checked = selectAll;
+            });
+            toggleDeleteButton();
+        });
+
+        document.querySelectorAll('.selectUser').forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
+                toggleDeleteButton();
+            });
+        });
+
+        function toggleDeleteButton() {
+            var anyChecked = document.querySelectorAll('.selectUser:checked').length > 0;
+            var deleteButton = document.getElementById('deleteSelectedBtn');
+            deleteButton.style.display = anyChecked ? 'inline-block' : 'none';
+        }
+
+        function deleteSelected() {
+            if (confirm('Tem certeza que deseja excluir os usuários selecionados?')) {
+                document.getElementById('deleteForm').submit();
+            }
+        }
+
+        function applyFilter() {
+            var searchTerm = document.getElementById('searchTerm').value;
+            var url = '@Url.Action("Index", "User", new { pageNumber = 1, pageSize = Model.PageSize })';
+            window.location.href = url + '&searchTerm=' + encodeURIComponent(searchTerm);
+        }
+
+        document.getElementById('searchTerm').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyFilter();
+            }
+        });
+    </script>
+}

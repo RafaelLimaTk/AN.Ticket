@@ -53,7 +53,7 @@
                             </div>
                             <div class="d-flex align-items-center gap-1 mb-3">
                                 <span class="badge bg-light text-dark border">@department.Code</span>
-                                <span class="badge bg-@(department.Status == DepartmentStatus.Active ? "success" : "secondary")">@department.Status</span>
+                                <span class="badge bg-@(department.Status == DepartmentStatus.Active ? "success" : "secondary")">@TranslateStatus(department.Status)</span>
                             </div>
 
                             <p class="text-muted">@department.Description</p>
@@ -128,6 +128,19 @@
         }
     </div>
 </div>
+
+@functions {
+    public static string TranslateStatus(DepartmentStatus status)
+    {
+        return status switch
+        {
+            DepartmentStatus.Active => "Ativo",
+            DepartmentStatus.Inactive => "Inativo",
+            _ => status.ToString()
+        };
+    }
+}
+
 
 @section Scripts {
     <script>

@@ -43,12 +43,13 @@ public class ActivityController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Create(Guid? ticketId)
+    public async Task<IActionResult> Create(Guid? ticketId, bool? isScreenTicket)
     {
         var model = new ActivityDto
         {
             ScheduledDate = DateTime.Now,
-            TicketId = ticketId ?? Guid.Empty
+            TicketId = ticketId ?? Guid.Empty,
+            IsScreenTicket = isScreenTicket ?? false
         };
 
         var tickets = await _ticketService.GetAllAsync();
@@ -73,6 +74,9 @@ public class ActivityController : Controller
             await _activityService.CreateActivityAsync(model);
 
             TempData["SuccessMessage"] = "Atividade criada com sucesso";
+            if (model.IsScreenTicket)
+                return RedirectToAction("Details", "Ticket", new { id = model.TicketId });
+
             return RedirectToAction(nameof(Index));
         }
         catch (EntityValidationException ex)
