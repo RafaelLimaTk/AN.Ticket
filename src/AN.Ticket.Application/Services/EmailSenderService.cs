@@ -5,6 +5,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using MimeKit.Utils;
 
 namespace AN.Ticket.Application.Services;
 public class EmailSenderService : IEmailSenderService
@@ -16,7 +17,7 @@ public class EmailSenderService : IEmailSenderService
         _smtpSettings = smtpSettings.Value;
     }
 
-    public async Task SendEmailAsync(string email, string subject, string message, List<EmailAttachment>? attachments = null)
+    public async Task SendEmailAsync(string email, string subject, string message, List<MimePart>? embeddedImages = null, List<EmailAttachment>? attachments = null)
     {
         var senderName = email;
         var senderAddress = _smtpSettings.Username;
@@ -37,7 +38,13 @@ public class EmailSenderService : IEmailSenderService
                 bodyBuilder.Attachments.Add(attachment.FileName, attachment.Content, ContentType.Parse(attachment.ContentType));
             }
         }
-
+        if (embeddedImages != null && embeddedImages.Any())
+        {
+            foreach (var mimePart in embeddedImages)
+            {
+                bodyBuilder.LinkedResources.Add(mimePart);
+            }
+        }
         emailMessage.Body = bodyBuilder.ToMessageBody();
 
         using var client = new SmtpClient();
