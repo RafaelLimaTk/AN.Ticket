@@ -162,21 +162,17 @@ public class TicketService
         string imagePathOpen = ticket.Status == TicketStatus.Open ? "/img/status/open-on.png" : "/img/status/open-off.png";
         string imagePathInProgress = ticket.Status == TicketStatus.InProgress ? "/img/status/progress-on.png" : "/img/status/progress-off.png";
         string imagePathClosed = ticket.Status == TicketStatus.Closed ? "/img/status/close-on.png" : "/img/status/close-off.png";
-<<<<<<< HEAD
         string imagePathHeader = "/img/logo/cabecalho.png";
-=======
->>>>>>> e3fe8d7d5afbbb7c4d028ecaf8368a6bbb8b718a
+
 
         var imageBytesOnHold = await GetImageBytesAsync(imagePathOnHold);
         var imageBytesOpen = await GetImageBytesAsync(imagePathOpen);
         var imageBytesInProgress = await GetImageBytesAsync(imagePathInProgress);
         var imageBytesClosed = await GetImageBytesAsync(imagePathClosed);
-<<<<<<< HEAD
         var imageBytesHeader = await GetImageBytesAsync(imagePathHeader);
-=======
->>>>>>> e3fe8d7d5afbbb7c4d028ecaf8368a6bbb8b718a
 
-        // Gerando os CIDs das imagens
+
+  
         var imageCidOnHold = MimeUtils.GenerateMessageId();
         var imageCidOpen = MimeUtils.GenerateMessageId();
         var imageCidInProgress = MimeUtils.GenerateMessageId();
