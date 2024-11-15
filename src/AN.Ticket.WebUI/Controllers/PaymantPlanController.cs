@@ -1,9 +1,12 @@
 ﻿using AN.Ticket.Application.DTOs.PaymantPlan;
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.WebUI.ViewModels.PaymantPlan;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AN.Ticket.WebUI.Controllers;
+
+[Authorize(Roles = "Admin")]
 public class PaymantPlanController : Controller
 {
     private readonly IPaymantPlanService _paymentPlanService;

@@ -101,9 +101,9 @@ public class ContactService
         return true;
     }
 
-    public async Task<PagedResult<ContactDto>> GetPaginatedContactsAsync(Guid userId, int pageNumber, int pageSize, string searchTerm = "")
+    public async Task<PagedResult<ContactDto>> GetPaginatedContactsAsync(int pageNumber, int pageSize, string searchTerm = "")
     {
-        var contactsQuery = await _contactRepository.GetByUserAsync(userId);
+        var contactsQuery = await _contactRepository.GetAllAsync();
 
         var filteredContacts = contactsQuery.AsQueryable();
 

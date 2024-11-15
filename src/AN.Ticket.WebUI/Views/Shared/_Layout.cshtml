@@ -26,7 +26,14 @@
                     data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
                     <i class="bi bi-list" style="font-size: 1.5rem;"></i>
                 </button>
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Atlas Network</a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="navbar-brand" asp-area="" asp-controller="Admin" asp-action="Index">Atlas Network</a>
+                }
+                else
+                {
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Atlas Network</a>
+                }
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -37,13 +44,12 @@
                             <a class="nav-link" href="#"><i class="bi bi-bell" title="em desenvolvimento"></i></a>
                         </li>
                         <li class="nav-item">
-                            @* <a class="nav-link" href="#"><i class="bi bi-gear" title="em desenvolvimento"></i></a> *@
                             <a class="nav-link" href="/Setting/Index"><i class="bi bi-gear fs-5"></i></a>
                         </li>
-                        <li class="nav-item">
+@*                         <li class="nav-item">
                             <a class="nav-link" href="#" id="themeToggleButton" title="em desenvolvimento"><i
                                     class="bi bi-moon"></i></a>
-                        </li>
+                        </li> *@
                         <li class="nav-item">
                             <a class="nav-link" href="#" id="fullscreenButton"><i
                                     class="bi bi-arrows-fullscreen"></i></a>
@@ -67,150 +73,185 @@
         </div>
         <div class="offcanvas-body">
             <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
-                        data-bs-target="#homeMenu" aria-expanded="false" aria-controls="homeMenu">
-                        <i class="bi bi-speedometer2"></i>
-                        <span class="ms-2">Home</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse" id="homeMenu">
-                        <ul class="navbar-nav ps-3">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-house"></i> Overview</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
-                        data-bs-target="#appFeaturesMenu" aria-expanded="false" aria-controls="appFeaturesMenu">
-                        <i class="bi bi-ticket"></i>
-                        <span class="ms-2">Ticket</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse" id="appFeaturesMenu">
-                        <ul class="navbar-nav ps-3">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Ticket" asp-action="Index"><i
-                                        class="bi bi-grid me-1"></i>Dashboard</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Ticket" asp-action="UserTickets"><i
-                                        class="bi bi-kanban me-1"></i>Seus Tickets</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Ticket" asp-action="UnassignedTickets"><i
-                                        class="bi bi-collection me-1"></i>Tickets não atribuidos</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Ticket" asp-action="CreateTicket"><i
-                                        class="bi bi-ticket-perforated me-1"></i>Criar novo ticket</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
-                        data-bs-target="#appFeaturesCustomer" aria-expanded="false" aria-controls="appFeaturesCustomer">
-                        <i class="bi bi-people"></i>
-                        <span class="ms-2">Cliente</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse" id="appFeaturesCustomer">
-                        <ul class="navbar-nav ps-3">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Contact" asp-action="Index"><i
-                                        class="bi bi-person-lines-fill me-1"></i>Clientes</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Contact" asp-action="CreateContact"><i
-                                        class="bi bi-person-add me-1"></i>Cadastrar Cliente</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
-                        data-bs-target="#appFeaturesActivity" aria-expanded="false" aria-controls="appFeaturesActivity">
-                        <i class="bi bi-activity"></i>
-                        <span class="ms-2">Atividade</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse" id="appFeaturesActivity">
-                        <ul class="navbar-nav ps-3">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Activity" asp-action="Index"><i
-                                        class="bi bi-person-workspace me-1"></i>Atividades</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Activity" asp-action="Create"><i
-                                        class="bi bi-node-plus me-1"></i>Criar Atividade</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
-                       data-bs-target="#appFeaturesAsset" aria-expanded="false" aria-controls="appFeaturesAsset">
-                        <i class="bi bi-box-seam"></i>
-                        <span class="ms-2">Ativos</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse" id="appFeaturesAsset">
-                        <ul class="navbar-nav ps-3">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Asset" asp-action="Index"><i class="bi bi-box me-1"></i>Ativos</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Asset" asp-action="Create"><i class="bi bi-box2 me-1"></i>Criar Ativo</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
-                       data-bs-target="#appFeaturesDepartment" aria-expanded="false" aria-controls="appFeaturesDepartment">
-                        <i class="bi bi-building"></i>
-                        <span class="ms-2">Departamentos</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse" id="appFeaturesDepartment">
-                        <ul class="navbar-nav ps-3">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Department" asp-action="Index"><i class="bi bi-building me-1"></i>Departamentos</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Department" asp-action="Create"><i class="bi bi-plus-circle me-1"></i>Criar Departamento</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
-                       data-bs-target="#appFeaturesUser" aria-expanded="false" aria-controls="appFeaturesUser">
-                        <i class="bi bi-person-badge"></i>
-                        <span class="ms-2">Usuário</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse" id="appFeaturesUser">
-                        <ul class="navbar-nav ps-3">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="User" asp-action="Index"><i class="bi bi-person-lines-fill me-1"></i>Gerenciar Usuários</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="User" asp-action="Create"><i class="bi bi-person-plus me-1"></i>Cadastrar Usuário</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
-                        data-bs-target="#financeMenu" aria-expanded="false" aria-controls="financeMenu">
-                        <i class="bi bi-currency-dollar"></i>
-                        <span class="ms-2">Relatório</span>
-                    </a>
-                </li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
+                           data-bs-target="#appFeaturesCustomer" aria-expanded="false" aria-controls="appFeaturesCustomer">
+                            <i class="bi bi-people"></i>
+                            <span class="ms-2">Cliente</span>
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse" id="appFeaturesCustomer">
+                            <ul class="navbar-nav ps-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Contact" asp-action="Index">
+                                        <i class="bi bi-person-lines-fill me-1"></i>Clientes
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Contact" asp-action="CreateContact">
+                                        <i class="bi bi-person-add me-1"></i>Cadastrar Cliente
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
+                           data-bs-target="#appFeaturesActivity" aria-expanded="false" aria-controls="appFeaturesActivity">
+                            <i class="bi bi-calendar-check"></i>
+                            <span class="ms-2">Atividade</span>
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse" id="appFeaturesActivity">
+                            <ul class="navbar-nav ps-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Activity" asp-action="Index">
+                                        <i class="bi bi-person-workspace me-1"></i>Atividades
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Activity" asp-action="Create">
+                                        <i class="bi bi-node-plus me-1"></i>Criar Atividade
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
+                           data-bs-target="#appFeaturesAsset" aria-expanded="false" aria-controls="appFeaturesAsset">
+                            <i class="bi bi-box-seam"></i>
+                            <span class="ms-2">Ativos</span>
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse" id="appFeaturesAsset">
+                            <ul class="navbar-nav ps-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Asset" asp-action="Index">
+                                        <i class="bi bi-box me-1"></i>Ativos
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Asset" asp-action="Create">
+                                        <i class="bi bi-box2 me-1"></i>Criar Ativo
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
+                           data-bs-target="#appFeaturesDepartment" aria-expanded="false" aria-controls="appFeaturesDepartment">
+                            <i class="bi bi-building"></i>
+                            <span class="ms-2">Departamentos</span>
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse" id="appFeaturesDepartment">
+                            <ul class="navbar-nav ps-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Department" asp-action="Index">
+                                        <i class="bi bi-building me-1"></i>Departamentos
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Department" asp-action="Create">
+                                        <i class="bi bi-plus-circle me-1"></i>Criar Departamento
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
+                           data-bs-target="#appFeaturesUser" aria-expanded="false" aria-controls="appFeaturesUser">
+                            <i class="bi bi-person-badge"></i>
+                            <span class="ms-2">Usuário</span>
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse" id="appFeaturesUser">
+                            <ul class="navbar-nav ps-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="User" asp-action="Index">
+                                        <i class="bi bi-person-lines-fill me-1"></i>Gerenciar Usuários
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="User" asp-action="Create">
+                                        <i class="bi bi-person-plus me-1"></i>Cadastrar Usuário
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                }
+
+                @if (User.IsInRole("Support"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
+                           data-bs-target="#supportHomeMenu" aria-expanded="false" aria-controls="supportHomeMenu">
+                            <i class="bi bi-house"></i>
+                            <span class="ms-2">Home</span>
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse" id="supportHomeMenu">
+                            <ul class="navbar-nav ps-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                        <i class="bi bi-house"></i> Overview
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
+                           data-bs-target="#supportTicketMenu" aria-expanded="false" aria-controls="supportTicketMenu">
+                            <i class="bi bi-ticket"></i>
+                            <span class="ms-2">Ticket</span>
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse" id="supportTicketMenu">
+                            <ul class="navbar-nav ps-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Ticket" asp-action="Index">
+                                        <i class="bi bi-grid me-1"></i>Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Ticket" asp-action="UserTickets">
+                                        <i class="bi bi-kanban me-1"></i>Seus Tickets
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Ticket" asp-action="UnassignedTickets">
+                                        <i class="bi bi-collection me-1"></i>Tickets não atribuidos
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Ticket" asp-action="CreateTicket">
+                                        <i class="bi bi-ticket-perforated me-1"></i>Criar novo ticket
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                }
+
+                @* <li class="nav-item">
+                <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
+                data-bs-target="#financeMenu" aria-expanded="false" aria-controls="financeMenu">
+                <i class="bi bi-currency-dollar"></i>
+                <span class="ms-2">Relatório</span>
+                </a>
+                </li> *@
             </ul>
         </div>
     </div>

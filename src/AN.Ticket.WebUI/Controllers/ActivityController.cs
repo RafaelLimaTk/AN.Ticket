@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AN.Ticket.WebUI.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class ActivityController : Controller
 {
     private readonly IActivityService _activityService;

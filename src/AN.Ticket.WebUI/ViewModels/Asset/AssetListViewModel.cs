@@ -9,6 +9,7 @@ public class AssetListViewModel
     public int PageSize { get; set; }
     public int TotalItems { get; set; }
     public string SearchTerm { get; set; } = string.Empty;
+    public string OrderBy { get; set; } = "PurchaseDate";
 
     public int TotalPages => (int)Math.Ceiling((double)TotalItems / PageSize);
 }

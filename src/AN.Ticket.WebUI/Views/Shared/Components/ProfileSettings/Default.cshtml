@@ -35,48 +35,51 @@
             <input type="email" class="form-control" id="email" name="email" value="@Model.Email">
         </div>
 
-        <div class="team-section">
-            <h3 class="mb-2">Equipes</h3>
+        @if (User.IsInRole("Support"))
+        {
+            <div class="team-section">
+                <h3 class="mb-2">Equipes</h3>
 
-            @if (Model.Teams == null || !Model.Teams.Any())
-            {
-                <div class="alert alert-primary" role="alert">
-                    Você não está em nenhuma equipe no momento.
-                </div>
-            }
-            else
-            {
-                @foreach (var team in Model.Teams)
+                @if (Model.Teams == null || !Model.Teams.Any())
                 {
-                    <div class="mb-4">
-                        <h5>@team.TeamName</h5>
-                        <div class="row">
-                            @foreach (var member in team.Members)
-                            {
-                                <div class="col-12 col-sm-6 col-md-3 mb-3">
-                                    <div class="d-flex align-items-center team-card p-2">
-                                        @if (!string.IsNullOrEmpty(member.ProfilePicture))
-                                        {
-                                            <img src="@member.ProfilePicture" class="profile-picture me-2" alt="Profile Picture" style="width: 50px; height: 50px; object-fit: cover;" />
-                                        }
-                                        else
-                                        {
-                                            <div class="profile-not-picture me-2" style="width: 50px; height: 50px;">
-                                                @GetInitials(member.FullName)
-                                            </div>
-                                        }
-                                        <div>
-                                            <strong>@member.FullName</strong>
-                                            <div class="team-role">@member.Email</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
+                    <div class="alert alert-primary" role="alert">
+                        Você não está em nenhuma equipe no momento.
                     </div>
                 }
-            }
-        </div>
+                else
+                {
+                    @foreach (var team in Model.Teams)
+                    {
+                        <div class="mb-4">
+                            <h5>@team.TeamName</h5>
+                            <div class="row">
+                                @foreach (var member in team.Members)
+                                {
+                                    <div class="col-12 col-sm-6 col-md-3 mb-3">
+                                        <div class="d-flex align-items-center team-card p-2">
+                                            @if (!string.IsNullOrEmpty(member.ProfilePicture))
+                                            {
+                                                <img src="@member.ProfilePicture" class="profile-picture me-2" alt="Profile Picture" style="width: 50px; height: 50px; object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="profile-not-picture me-2" style="width: 50px; height: 50px;">
+                                                    @GetInitials(member.FullName)
+                                                </div>
+                                            }
+                                            <div>
+                                                <strong>@member.FullName</strong>
+                                                <div class="team-role">@member.Email</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
         <button type="submit" class="btn btn-dark mt-4 w-100">Salvar Alterações</button>
     </form>
 </div>

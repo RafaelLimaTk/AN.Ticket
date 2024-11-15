@@ -46,6 +46,7 @@ public static class DependencyInjectionConfig
         services.AddScoped<IAssetService, AssetService>();
         services.AddScoped<IAssetAssignmentService, AssetAssignmentService>();
         services.AddScoped<IDepartmentService, DepartmentService>();
+        services.AddScoped<IAdminService, AdminService>();
         #endregion
 
         #region Repositories

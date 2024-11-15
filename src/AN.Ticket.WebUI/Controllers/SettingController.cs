@@ -1,10 +1,12 @@
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.WebUI.ViewModels.Setting;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace AN.Ticket.WebUI.Controllers;
 
+[Authorize]
 public class SettingController : Controller
 {
     private readonly ILogger<SettingController> _logger;

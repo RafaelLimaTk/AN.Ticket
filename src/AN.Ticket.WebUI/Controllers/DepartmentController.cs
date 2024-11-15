@@ -3,10 +3,13 @@ using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Domain.Enums;
 using AN.Ticket.WebUI.ViewModels.Asset;
 using AN.Ticket.WebUI.ViewModels.Department;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AN.Ticket.WebUI.Controllers;
+
+[Authorize(Roles = "Admin")]
 public class DepartmentController : Controller
 {
     private readonly IDepartmentService _departmentService;

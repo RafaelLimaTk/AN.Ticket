@@ -333,10 +333,10 @@ public class TicketService
         }).ToList();
     }
 
-    public async Task<bool> AssignTicketToUserAsync(Guid ticketId, Guid userId)
+    public async Task<bool> AssignTicketToUserAsync(Guid ticketId, Guid userId, bool byAdmin = false)
     {
         var ticket = await _ticketRepository.GetByIdAsync(ticketId);
-        if (ticket is null || ticket.UserId != null)
+        if (!byAdmin && (ticket is null || ticket.UserId != null))
         {
             return false;
         }
@@ -464,7 +464,9 @@ public class TicketService
 
                 var attachment = new Attachment(file.FileName, memoryStream.ToArray(), file.ContentType, ticket.Id);
                 ticket.AddAttachment(attachment);
+                attachment.AssignToMessage(ticketMessage.Id);
                 emailAttachments.Add(new EmailAttachment(file.FileName, memoryStream.ToArray(), file.ContentType));
+                await _attachmentRepository.SaveAsync(attachment);
             }
         }
 

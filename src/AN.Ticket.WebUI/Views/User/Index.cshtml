@@ -68,9 +68,9 @@
                             <th scope="col" style="width: 1%; border-top-left-radius: 10px;">
                                 <input type="checkbox" id="selectAll">
                             </th>
-                            <th scope="col" style="width: 5%;">Foto</th>
+                            <th scope="col" class="d-none d-md-table-cell" style="width: 5%;">Foto</th>
                             <th scope="col" style="width: 20%;">Nome</th>
-                            <th scope="col" style="width: 20%;">Email</th>
+                            <th scope="col" class="d-none d-md-table-cell" style="width: 20%;">Email</th>
                             <th scope="col" class="d-none d-md-table-cell" style="width: 15%;">Função</th>
                             <th scope="col" class="d-none d-md-table-cell" style="width: 15%;">Criado em</th>
                             <th scope="col" style="width: 10%; border-top-right-radius: 10px;">Ações</th>
@@ -83,7 +83,7 @@
                                 <td>
                                     <input type="checkbox" class="selectUser" name="ids" value="@user.Id">
                                 </td>
-                                <td>
+                                <td class="d-none d-md-table-cell">
                                     @if (!string.IsNullOrEmpty(user.ProfilePicture))
                                     {
                                         <img src="@user.ProfilePicture" alt="Foto de @user.FullName" class="rounded-circle" width="40" height="40" />
@@ -98,7 +98,7 @@
                                 <td>
                                     <div class="fw-bold">@user.FullName</div>
                                 </td>
-                                <td>
+                                <td class="d-none d-md-table-cell">
                                     <div>@user.Email</div>
                                 </td>
                                 <td class="d-none d-md-table-cell">
@@ -209,14 +209,15 @@
 
         function toggleDeleteButton() {
             var anyChecked = document.querySelectorAll('.selectUser:checked').length > 0;
-            var deleteButton = document.getElementById('deleteSelectedBtn');
-            deleteButton.style.display = anyChecked ? 'inline-block' : 'none';
+            var deleteButtons = document.querySelectorAll('#deleteSelectedBtn');
+
+            deleteButtons.forEach(function (button) {
+                button.style.display = anyChecked ? 'inline-block' : 'none';
+            });
         }
 
         function deleteSelected() {
-            if (confirm('Tem certeza que deseja excluir os usuários selecionados?')) {
-                document.getElementById('deleteForm').submit();
-            }
+            document.getElementById('deleteForm').submit();
         }
 
         function applyFilter() {

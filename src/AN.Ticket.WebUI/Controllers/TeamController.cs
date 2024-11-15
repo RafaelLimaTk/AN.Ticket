@@ -2,10 +2,14 @@
 using AN.Ticket.Application.DTOs.User;
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Domain.EntityValidations;
+using AN.Ticket.Domain.Enums;
 using AN.Ticket.WebUI.ViewModels.Team;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AN.Ticket.WebUI.Controllers;
+
+[Authorize]
 public class TeamController : Controller
 {
     private readonly ITeamService _teamService;
@@ -44,7 +48,7 @@ public class TeamController : Controller
         var users = await _userService.GetAllUsersAsync();
         var viewModel = new TeamCreationViewModel
         {
-            AvailableUsers = users.ToList()
+            AvailableUsers = users.Where(us => us.Role != UserRole.Admin).ToList()
         };
         return PartialView("~/Views/Shared/Partials/Team/_CreateTeamModal.cshtml", viewModel);
     }
@@ -84,7 +88,8 @@ public class TeamController : Controller
     public async Task<IActionResult> ShowAddMemberModal(Guid teamId)
     {
         var users = await _userService.GetAllUsersAsync();
-        ViewBag.AvailableUsers = users;
+        var usersNotAdmin = users.Where(us => us.Role != UserRole.Admin);
+        ViewBag.AvailableUsers = usersNotAdmin;
         return PartialView("_AddMemberModal", teamId);
     }
 

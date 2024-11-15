@@ -1,8 +1,11 @@
 ﻿using AN.Ticket.WebUI.ViewModels.Setting;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 
 namespace AN.Ticket.WebUI.Controllers;
+
+[Authorize(Roles = "Admin")]
 public class ApiKeyController : Controller
 {
     private readonly IConfiguration _configuration;

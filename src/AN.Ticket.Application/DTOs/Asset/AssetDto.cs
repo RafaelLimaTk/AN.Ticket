@@ -1,7 +1,6 @@
 ﻿using AN.Ticket.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
 namespace AN.Ticket.Application.DTOs.Asset;
 public class AssetDto

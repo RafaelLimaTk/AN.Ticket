@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AN.Ticket.WebUI.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class ContactController : Controller
 {
     private readonly ILogger<ContactController> _logger;
@@ -77,8 +77,7 @@ public class ContactController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10, string searchTerm = "")
     {
-        var userId = await GetCurrentUserId();
-        var paginatedContacts = await _contactService.GetPaginatedContactsAsync(userId, pageNumber, pageSize, searchTerm);
+        var paginatedContacts = await _contactService.GetPaginatedContactsAsync(pageNumber, pageSize, searchTerm);
 
         var contactDTOs = paginatedContacts.Items.Select(contact => new ContactDto
         {

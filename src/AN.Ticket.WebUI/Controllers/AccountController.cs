@@ -1,4 +1,5 @@
 ﻿using AN.Ticket.Application.Interfaces;
+using AN.Ticket.Domain.Accounts;
 using AN.Ticket.Domain.Entities;
 using AN.Ticket.Domain.Enums;
 using AN.Ticket.Domain.Interfaces;
@@ -22,6 +23,7 @@ public class AccountController : Controller
     private readonly IEmailSenderService _emailSenderService;
     private readonly IUserRepository _userRepository;
     private readonly IFileService _fileService;
+    private readonly ISeedUserRoleInitial _seedUserRoleInitial;
     private readonly IUnitOfWork _unitOfWork;
 
     public AccountController(
@@ -31,6 +33,7 @@ public class AccountController : Controller
         IEmailSenderService emailSenderService,
         IUserRepository userRepository,
         IFileService fileService,
+        ISeedUserRoleInitial seedUserRoleInitial,
         IUnitOfWork unitOfWork
     )
     {
@@ -40,6 +43,7 @@ public class AccountController : Controller
         _emailSenderService = emailSenderService;
         _userRepository = userRepository;
         _fileService = fileService;
+        _seedUserRoleInitial = seedUserRoleInitial;
         _unitOfWork = unitOfWork;
     }
 
@@ -98,6 +102,9 @@ public class AccountController : Controller
 
                 return RedirectToAction(nameof(VerifyEmail));
             }
+
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+                return RedirectToAction(nameof(AdminController.Index), "Admin");
 
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }

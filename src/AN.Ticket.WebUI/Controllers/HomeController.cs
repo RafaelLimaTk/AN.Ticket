@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace AN.Ticket.WebUI.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Support")]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;

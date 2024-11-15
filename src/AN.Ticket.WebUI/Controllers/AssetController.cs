@@ -4,10 +4,13 @@ using AN.Ticket.Domain.Enums;
 using AN.Ticket.Infra.Data.Identity;
 using AN.Ticket.WebUI.Components;
 using AN.Ticket.WebUI.ViewModels.Asset;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AN.Ticket.WebUI.Controllers;
+
+[Authorize(Roles = "Admin")]
 public class AssetController : Controller
 {
     private readonly IAssetService _assetService;

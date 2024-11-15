@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AN.Ticket.WebUI.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Support")]
 public class TicketController : Controller
 {
     private readonly ITicketService _ticketService;
@@ -98,7 +98,7 @@ public class TicketController : Controller
             if (user is null)
                 return Unauthorized();
 
-            var success = await _ticketService.AssignTicketToUserAsync(ticketId, Guid.Parse(user.Id));
+            var success = await _ticketService.AssignTicketToUserAsync(ticketId, Guid.Parse(user.Id), false);
 
             if (!success)
             {

@@ -135,4 +135,77 @@ public class TicketRepository
             })
             .ToListAsync();
     }
+
+    public async Task<(IEnumerable<DomainEntity.Ticket> Items, int TotalCount)> GetPaginatedTicketsAsync(
+        int pageNumber,
+        int pageSize,
+        string searchTerm = "",
+        string orderBy = "CreatedAt",
+        TicketStatus? statusFilter = null
+    )
+    {
+        var query = Entities.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(t =>
+                t.Subject.Contains(searchTerm) ||
+                t.ContactName.Contains(searchTerm) ||
+                t.Email.Contains(searchTerm)
+            );
+        }
+
+        if (statusFilter.HasValue)
+        {
+            query = query.Where(t => t.Status == statusFilter.Value);
+        }
+
+        var orderedQuery = query.OrderBy(t => t.UserId.HasValue);
+
+        orderedQuery = orderBy switch
+        {
+            "Subject" => orderedQuery.ThenBy(t => t.Subject),
+            "ContactName" => orderedQuery.ThenBy(t => t.ContactName),
+            "Email" => orderedQuery.ThenBy(t => t.Email),
+            "Priority" => orderedQuery.ThenBy(t => t.Priority),
+            "DueDate" => orderedQuery.ThenBy(t => t.DueDate),
+            _ => orderedQuery.ThenBy(t => t.CreatedAt)
+        };
+
+        var totalCount = await orderedQuery.CountAsync();
+
+        var items = await orderedQuery
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Include(t => t.User)
+            .Include(t => t.Messages)
+            .Include(t => t.Attachments)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
+    public async Task<(int TicketsConcluidos, int TicketsEmAndamento, double tempoEconomizadoHoras)> GetTicketMetricsAsync()
+    {
+        var metrics = await Entities
+            .AsNoTracking()
+            .Where(t => t.Status == TicketStatus.Closed || t.Status == TicketStatus.Open || t.Status == TicketStatus.InProgress)
+            .Select(t => new
+            {
+                t.Status,
+                t.ClosedAt,
+                TempoEconomizado = t.ClosedAt.HasValue ?
+                    EF.Functions.DateDiffHour(t.ClosedAt.Value, t.DueDate) : 0
+            })
+            .ToListAsync();
+
+        var ticketsConcluidos = metrics.Count(t => t.Status == TicketStatus.Closed);
+        var ticketsEmAndamento = metrics.Count(t => t.Status == TicketStatus.Open || t.Status == TicketStatus.InProgress);
+
+        var tempoEconomizadoHoras = metrics
+            .Where(t => t.Status == TicketStatus.Closed && t.ClosedAt.HasValue)
+            .Sum(t => t.TempoEconomizado);
+
+        return (ticketsConcluidos, ticketsEmAndamento, tempoEconomizadoHoras);
+    }
 }

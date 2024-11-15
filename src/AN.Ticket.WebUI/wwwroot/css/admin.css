@@ -1,0 +1,147 @@
+﻿.summary-card {
+    display: flex;
+    align-items: center;
+    background-color: #FFFFFF;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    margin-right: 10px;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.summary-card i {
+    font-size: 1.2rem;
+    margin-right: 5px;
+}
+
+.summary-card span {
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.quick-action-card {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+    transition: background-color 0.3s;
+}
+
+.quick-action-card:hover {
+    background-color: #FFFFFF !important;
+}
+
+.quick-action-card i {
+    font-size: 1.5rem;
+    margin-right: 8px;
+}
+
+.note-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+}
+
+#notes-list .note-item {
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+#notes-list .note-item:last-child {
+    border-bottom: none;
+}
+
+#notes-list .note-item:hover {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.note-content {
+    flex: 1;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+#note-input {
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.asset-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.asset-item {
+    padding: 0.75rem 1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.asset-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+}
+
+.asset-list .asset-item + .asset-item {
+    margin-top: 10px;
+}
+
+form select.form-select {
+    min-width: 150px;
+}
+
+form .btn-primary {
+    margin-left: 5px;
+}
+
+.badge-open {
+    background-color: #ffc107;
+    color: #fff;
+}
+
+.badge-inprogress {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.badge-onhold {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.badge-closed {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+
+@media (max-width: 576px) {
+    .header-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    #notes-card .btn-primary, #notes-card .btn-outline-danger {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+
+    #notes-card .btn-primary, #notes-card .btn-outline-danger {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+}
