@@ -120,7 +120,7 @@
                     @if (Model.PageNumber > 1)
                     {
                         <li class="page-item">
-                            <a class="page-link" href="@Url.Action("GetContact", new { pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Anterior">
+                            <a class="page-link" href="@Url.Action("Index", new { pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Anterior">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
@@ -128,13 +128,13 @@
                     @for (var i = 1; i <= Model.TotalPages; i++)
                     {
                         <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                            <a class="page-link" href="@Url.Action("GetContact", new { pageNumber = i, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })">@i</a>
+                            <a class="page-link" href="@Url.Action("Index", new { pageNumber = i, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })">@i</a>
                         </li>
                     }
                     @if (Model.PageNumber < Model.TotalPages)
                     {
                         <li class="page-item">
-                            <a class="page-link" href="@Url.Action("GetContact", new { pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Próximo">
+                            <a class="page-link" href="@Url.Action("Index", new { pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Próximo">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>
