@@ -85,6 +85,7 @@ public class TicketRepository
     {
         return await Entities
             .AsNoTracking()
+            .Include(x => x.Messages)
             .SingleAsync(x => x.TicketCode == ticketCode);
     }
 
