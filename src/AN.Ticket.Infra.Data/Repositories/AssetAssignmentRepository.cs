@@ -28,4 +28,12 @@ public class AssetAssignmentRepository : Repository<AssetAssignment>, IAssetAssi
             .Where(a => a.AssetId == assetId)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<IEnumerable<AssetAssignment>> GetByContactIdAsync(Guid contactId)
+    {
+        return await Entities
+            .Include(a => a.Asset)
+            .Where(a => a.ContactId == contactId)
+            .ToListAsync();
+    }
 }

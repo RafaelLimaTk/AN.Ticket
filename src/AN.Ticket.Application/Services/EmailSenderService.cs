@@ -5,7 +5,6 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using MimeKit.Utils;
 
 namespace AN.Ticket.Application.Services;
 public class EmailSenderService : IEmailSenderService
@@ -38,6 +37,7 @@ public class EmailSenderService : IEmailSenderService
                 bodyBuilder.Attachments.Add(attachment.FileName, attachment.Content, ContentType.Parse(attachment.ContentType));
             }
         }
+
         if (embeddedImages != null && embeddedImages.Any())
         {
             foreach (var mimePart in embeddedImages)
@@ -54,7 +54,7 @@ public class EmailSenderService : IEmailSenderService
         await client.DisconnectAsync(true);
     }
 
-    public async Task SendEmailResponseAsync(string email, string subject, string message, string originalMessageId, List<EmailAttachment>? attachments = null)
+    public async Task SendEmailResponseAsync(string email, string subject, string message, string originalMessageId, List<EmailAttachment>? attachments = null, List<MimePart>? embeddedImages = null)
     {
         var senderName = email;
         var senderAddress = _smtpSettings.Username;
@@ -73,6 +73,23 @@ public class EmailSenderService : IEmailSenderService
             foreach (var attachment in attachments)
             {
                 bodyBuilder.Attachments.Add(attachment.FileName, attachment.Content, ContentType.Parse(attachment.ContentType));
+            }
+        }
+
+        if (embeddedImages != null && embeddedImages.Any())
+        {
+            foreach (var mimePart in embeddedImages)
+            {
+                using var memoryStream = new MemoryStream();
+                mimePart.Content.DecodeTo(memoryStream);
+                memoryStream.Position = 0;
+
+                var linkedResource = bodyBuilder.LinkedResources.Add(
+                    mimePart.ContentId,
+                    memoryStream.ToArray(),
+                    ContentType.Parse(mimePart.ContentType.MimeType)
+                );
+                linkedResource.ContentId = mimePart.ContentId;
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using AN.Ticket.Application.DTOs.Activity;
+using AN.Ticket.Application.DTOs.Asset;
 using AN.Ticket.Application.DTOs.Email;
 using AN.Ticket.Application.DTOs.SatisfactionRating;
 using AN.Ticket.Application.DTOs.Ticket;
@@ -33,6 +34,8 @@ public class TicketService
     private readonly IEmailSenderService _emailSenderService;
     private readonly IAttachmentRepository _attachmentRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IAssetAssignmentRepository _assetAssignmentRepository;
+    private readonly IContactRepository _contactRepository;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -46,6 +49,8 @@ public class TicketService
         IEmailSenderService emailSenderService,
         IAttachmentRepository attachmentRepository,
         IUserRepository userRepository,
+        IAssetAssignmentRepository assetAssignmentRepository,
+        IContactRepository contactRepository,
         IMapper mapper,
         IUnitOfWork unitOfWork
     )
@@ -60,9 +65,12 @@ public class TicketService
         _emailSenderService = emailSenderService;
         _attachmentRepository = attachmentRepository;
         _userRepository = userRepository;
+        _assetAssignmentRepository = assetAssignmentRepository;
+        _contactRepository = contactRepository;
         _mapper = mapper;
         _unitOfWork = unitOfWork;
     }
+
     public async Task<byte[]> GetImageBytesAsync(string relativePath)
     {
         using (HttpClient client = new HttpClient())
@@ -80,6 +88,7 @@ public class TicketService
             }
         }
     }
+
     public async Task<bool> CreateTicketAsync(CreateTicketDto createTicket)
     {
         var ticket = new DomainEntity.Ticket(
@@ -139,29 +148,7 @@ public class TicketService
 
         var code = await _ticketRepository.GetTicketCodeByIdAsync(ticket.Id);
 
-        //await _emailSenderService.SendEmailAsync(
-        //    ticket.Email,
-        //    ticket.Subject,
-        //    $@"
-        //    <html>
-        //        <body>
-        //            <h2 style='color: #0056b3;'>Olá {ticket.ContactName},</h2>
-        //            <p>#{code}</p>
-        //            <p>Obrigado por entrar em contato com o nosso suporte! Seu ticket foi <strong>criado com sucesso</strong> e nossa equipe já está trabalhando para resolvê-lo. Se você tiver mais detalhes ou informações para adicionar, basta responder este e-mail.</p>
-
-        //            <h3>Detalhes do Ticket:</h3>
-        //            <ul style='list-style-type: none; padding: 0;'>
-        //                <li><strong>Assunto:</strong> {ticket.Subject}</li>
-        //                <li><strong>Descrição:</strong> {createTicket.Description}</li>
-        //            </ul>
-
-        //            <hr style='border: 0; border-top: 1px solid #eee;' />
-
-        //            <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
-        //        </body>
-        //    </html>"
-        //);
-        string imagePathOnHold = ticket.Status == TicketStatus.Onhold ? "/img/status/onhold-on.png" : "/img/status/onhold-off.png";
+        string imagePathOnHold = ticket.Status == TicketStatus.Onhold ? "/img/status/onhold-on.png" : "/img/status/onhold-on.png";
         string imagePathOpen = ticket.Status == TicketStatus.Open ? "/img/status/open-on.png" : "/img/status/open-off.png";
         string imagePathInProgress = ticket.Status == TicketStatus.InProgress ? "/img/status/progress-on.png" : "/img/status/progress-off.png";
         string imagePathClosed = ticket.Status == TicketStatus.Closed ? "/img/status/close-on.png" : "/img/status/close-off.png";
@@ -171,7 +158,6 @@ public class TicketService
         var imageBytesInProgress = await GetImageBytesAsync(imagePathInProgress);
         var imageBytesClosed = await GetImageBytesAsync(imagePathClosed);
 
-        // Gerando os CIDs das imagens
         var imageCidOnHold = MimeUtils.GenerateMessageId();
         var imageCidOpen = MimeUtils.GenerateMessageId();
         var imageCidInProgress = MimeUtils.GenerateMessageId();
@@ -180,7 +166,7 @@ public class TicketService
         string htmlContent = $@"
             <html>
                 <body>
-                    <div style='max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f9f9f9;'>
+                    <div style='max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;'>
                         <h2 style='color: #0056b3; text-align: center;'>Suporte ao Cliente</h2>
                         <h3>Olá {ticket.ContactName}</h3>
                         <p>Recebemos seu contato e um <strong>chamado de suporte</strong> foi aberto com sucesso! Nossa equipe está trabalhando para solucionar o seu problema o mais rápido possível.</p>
@@ -196,13 +182,11 @@ public class TicketService
                         <h3>Contatos para Suporte:</h3>
                         <p>Você também pode entrar em contato conosco pelos seguintes canais de atendimento:</p>
                         <ul style='list-style-type: none; padding: 0;'>
-                            <li><strong>Email:</strong> suporte@atlasnetworks.com</li>
-                            <li><strong>WhatsApp:</strong> (11) 98765-4321</li>
+                            <li><strong>Email:</strong> suporte.anatlasnetwork@gmail.com</li>
                             <li><strong>Horário de Atendimento:</strong> Segunda a Sexta, das 8h às 18h</li>
                         </ul>
                        <div style='margin-top: 20px; position: relative; text-align: center;'>
                             <!-- Linha tracejada -->
-                            <div style='position: absolute; top: 50%; left: 0; right: 0; border-top: 1px dashed #aaa; transform: translateY(-50%);'></div>
                             
                             <!-- Tabela para alinhar os ícones e textos -->
                             <table style='width: 100%; z-index: 1; position: relative; background-color: #fff;'>
@@ -366,6 +350,19 @@ public class TicketService
                 .ToList();
         }
 
+        var email = ticket.Email;
+        var contact = await _contactRepository.GetByEmailAsync(email);
+
+        if (contact is not null)
+        {
+            var assets = (await _assetAssignmentRepository
+                .GetByContactIdAsync(contact.Id))
+                .Select(assignment => assignment.Asset)
+                .ToList();
+
+            ticketDetailsDto.Ticket.Assets = _mapper.Map<List<AssetDto>>(assets);
+        }
+
         return ticketDetailsDto;
     }
 
@@ -392,37 +389,129 @@ public class TicketService
 
         if (ticketResolutionDto.NotifyContact)
         {
+            string imagePathOnHold = ticket.Status == TicketStatus.Onhold ? "/img/status/onhold-on.png" : "/img/status/onhold-on.png";
+            string imagePathOpen = ticket.Status == TicketStatus.Open ? "/img/status/open-on.png" : "/img/status/open-on.png";
+            string imagePathInProgress = ticket.Status == TicketStatus.InProgress ? "/img/status/progress-on.png" : "/img/status/progress-on.png";
+            string imagePathClosed = ticket.Status == TicketStatus.Closed ? "/img/status/close-on.png" : "/img/status/close-on.png";
+
+            var imageBytesOnHold = await GetImageBytesAsync(imagePathOnHold);
+            var imageBytesOpen = await GetImageBytesAsync(imagePathOpen);
+            var imageBytesInProgress = await GetImageBytesAsync(imagePathInProgress);
+            var imageBytesClosed = await GetImageBytesAsync(imagePathClosed);
+
+            var imageCidOnHold = MimeUtils.GenerateMessageId();
+            var imageCidOpen = MimeUtils.GenerateMessageId();
+            var imageCidInProgress = MimeUtils.GenerateMessageId();
+            var imageCidClosed = MimeUtils.GenerateMessageId();
+
             string emailContent = $@"
             <html>
-                <body>
-                    <h1>Ticket Fechado</h1>
-                    <p>O ticket com o código {ticket.TicketCode} foi fechado.</p>
-                    <p>Assunto: {ticket.Subject}</p>
-                    <p>Data de Fechamento: {ticket.ClosedAt?.ToString("dd/MM/yyyy HH:mm:ss")}</p>
-                    <p>Obrigado por utilizar nossos serviços.</p>";
+            <body style='font-family: Arial, sans-serif; color: #333; padding: 20px;'>
+                <div style='max-width: 600px; margin: auto; border-radius: 10px; background-color: #ffffff; border: 1px solid #ddd; padding: 20px;'>
+                    <h2 style='color: #0056b3; text-align: center;'>Ticket Resolvido</h2>
+                    <p>Olá {ticket.ContactName},</p>
+                    <p>Informamos que o ticket com o código <strong>#{ticket.TicketCode}</strong> foi resolvido com sucesso.</p>
+                    <p>Detalhes da Resolução:</p>
+                    <blockquote style='margin: 20px 0; padding: 10px; background-color: #f1f9ff; border-left: 4px solid #0056b3;'>
+                        {ticketResolutionDto.ResolutionDetails}
+                    </blockquote>
+                    <p>Data de Resolução: {ticket.ClosedAt?.ToString("dd/MM/yyyy HH:mm:ss")}</p>
+
+                    <div style='margin-top: 20px; position: relative; text-align: center;'>
+                        
+                        <!-- Tabela para alinhar os ícones e textos -->
+                        <table style='width: 100%; z-index: 1; position: relative; background-color: transparent;'>
+                            <tr>
+                                <!-- Status: Em espera -->
+                                <td style='text-align: center; color: #aaa; padding: 0 10px; position: relative;'>
+                                    <div style='position: relative; z-index: 2;'>
+                                        <img src='cid:{imageCidOnHold}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Em espera</p>
+                                    </div>
+                                </td>
+
+                                <!-- Status: Aberto -->
+                                <td style='text-align: center; color: #aaa; padding: 0 10px; position: relative;'>
+                                    <div style='position: relative; z-index: 2;'>
+                                        <img src='cid:{imageCidOpen}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Aberto</p>
+                                    </div>
+                                </td>
+
+                                <!-- Status: Em progresso -->
+                                <td style='text-align: center; color: #aaa; padding: 0 10px; position: relative;'>
+                                    <div style='position: relative; z-index: 2;'>
+                                        <img src='cid:{imageCidInProgress}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Em progresso</p>
+                                    </div>
+                                </td>
+
+                                <!-- Status: Fechado -->
+                                <td style='text-align: center; color: #aaa; padding: 0 10px; position: relative;'>
+                                    <div style='position: relative; z-index: 2;'>
+                                        <img src='cid:{imageCidClosed}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Fechado</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>";
 
             bool existsSatisfactionRating = await _satisfactionRatingRepository.ExistsByTicketIdAsync(ticket.Id);
             if (!existsSatisfactionRating)
             {
                 var satisfactionRatingContent = GenerateSatisfactionRatingEmailContent(ticket.Id);
                 emailContent += $@"
-                    <hr style='border: 0; border-top: 1px solid #eee;' />
-                    <p>Por favor, avalie o seu atendimento:</p>
-                    {satisfactionRatingContent}";
+                        <hr style='border: 0; border-top: 1px solid #eee;' />
+                        <p>Sua opinião é muito importante para nós! Por favor, avalie nosso atendimento:</p>
+                        {satisfactionRatingContent}";
             }
 
             emailContent += @"
-                    <hr style='border: 0; border-top: 1px solid #eee;' />
-                    <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
+                        <hr style='border: 0; border-top: 1px solid #eee;' />
+                        <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
+                    </div>
                 </body>
             </html>";
 
-            await _emailSenderService.SendEmailResponseAsync(
-                ticket.Email,
-                "Ticket Resolvido",
-                emailContent,
-                ticket.EmailMessageId!
-            );
+            var imageMimeParts = new List<MimePart>
+            {
+                new MimePart("image", "png")
+                {
+                    Content = new MimeContent(new MemoryStream(imageBytesOnHold)),
+                    ContentId = imageCidOnHold,
+                    ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                    ContentTransferEncoding = ContentEncoding.Base64
+                },
+                new MimePart("image", "png")
+                {
+                    Content = new MimeContent(new MemoryStream(imageBytesOpen)),
+                    ContentId = imageCidOpen,
+                    ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                    ContentTransferEncoding = ContentEncoding.Base64
+                },
+                new MimePart("image", "png")
+                {
+                    Content = new MimeContent(new MemoryStream(imageBytesInProgress)),
+                    ContentId = imageCidInProgress,
+                    ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                    ContentTransferEncoding = ContentEncoding.Base64
+                },
+                new MimePart("image", "png")
+                {
+                    Content = new MimeContent(new MemoryStream(imageBytesClosed)),
+                    ContentId = imageCidClosed,
+                    ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                    ContentTransferEncoding = ContentEncoding.Base64
+                }
+            };
+
+            await _emailSenderService.SendEmailAsync(
+                 ticket.Email,
+                 "Ticket Resolvido",
+                 emailContent,
+                 imageMimeParts
+             );
         }
 
         return true;
@@ -474,38 +563,120 @@ public class TicketService
         _ticketRepository.Update(ticket);
         await _unitOfWork.CommitAsync();
 
+        string imagePathOnHold = ticket.Status == TicketStatus.Onhold ? "/img/status/onhold-on.png" : "/img/status/onhold-on.png";
+        string imagePathOpen = ticket.Status == TicketStatus.Open ? "/img/status/open-on.png" : "/img/status/open-on.png";
+        string imagePathInProgress = ticket.Status == TicketStatus.InProgress ? "/img/status/progress-on.png" : "/img/status/progress-off.png";
+        string imagePathClosed = ticket.Status == TicketStatus.Closed ? "/img/status/close-on.png" : "/img/status/close-off.png";
+
+        var imageBytesOnHold = await GetImageBytesAsync(imagePathOnHold);
+        var imageBytesOpen = await GetImageBytesAsync(imagePathOpen);
+        var imageBytesInProgress = await GetImageBytesAsync(imagePathInProgress);
+        var imageBytesClosed = await GetImageBytesAsync(imagePathClosed);
+
+        var imageCidOnHold = MimeUtils.GenerateMessageId();
+        var imageCidOpen = MimeUtils.GenerateMessageId();
+        var imageCidInProgress = MimeUtils.GenerateMessageId();
+        var imageCidClosed = MimeUtils.GenerateMessageId();
+
         string emailContent = $@"
         <html>
-            <body>
-                <h1 style='color: #0056b3;'>Resposta ao seu ticket</h1>
-                <p>Olá {ticket.ContactName},</p>
-                <p>Você recebeu uma nova resposta ao seu ticket:</p>
-                <p>#{ticket.TicketCode}</p>
-                <p><strong>Mensagem:</strong> {messageText}</p>
-                <p>Se precisar de mais assistência, por favor, responda a este e-mail.</p>
-                <p>Obrigado por utilizar nossos serviços!</p>";
+            <body style='font-family: Arial, sans-serif; color: #333; padding: 20px;'>
+                <div style='max-width: 600px; margin: auto; border-radius: 10px; background-color: #ffffff; border: 1px solid #ddd; padding: 20px;'>
+                    <h2 style='color: #0056b3; text-align: center;'>Resposta ao seu Ticket</h2>
+                    <p>Olá {ticket.ContactName},</p>
+                    <p>Recebemos uma nova resposta ao seu ticket com o código <strong>#{ticket.TicketCode}</strong>:</p>
+                    <blockquote style='margin: 20px 0; padding: 10px; background-color: #f1f9ff; border-left: 4px solid #0056b3;'>
+                        {messageText}
+                    </blockquote>
+                    <p>Se precisar de mais informações ou tiver dúvidas, basta responder este e-mail. Nossa equipe está pronta para ajudar!</p>
 
-        bool existsSatisfactionRating = await _satisfactionRatingRepository.ExistsByTicketIdAsync(ticket.Id);
-        if (!existsSatisfactionRating)
-        {
-            var satisfactionRatingContent = GenerateSatisfactionRatingEmailContent(ticket.Id);
-            emailContent += $@"
-                <hr style='border: 0; border-top: 1px solid #eee;' />
-                {satisfactionRatingContent}";
-        }
+                    <div style='margin-top: 20px; position: relative; text-align: center;'>
+                        <!-- Linha tracejada -->
+    
+                        <!-- Tabela para alinhar os ícones e textos -->
+                        <table style='width: 100%; z-index: 1; position: relative; background-color: transparent;'>
+                            <tr>
+                                <!-- Status: Em espera -->
+                                <td style='text-align: center; color: #aaa; padding: 0 10px; position: relative;'>
+                                    <div style='position: relative; z-index: 2;'>
+                                        <img src='cid:{imageCidOnHold}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Em espera</p>
+                                    </div>
+                                </td>
 
-        emailContent += @"
-                <hr style='border: 0; border-top: 1px solid #eee;' />
-                <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
+                                <!-- Status: Aberto -->
+                                <td style='text-align: center; color: #aaa; padding: 0 10px; position: relative;'>
+                                    <div style='position: relative; z-index: 2;'>
+                                        <img src='cid:{imageCidOpen}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Aberto</p>
+                                    </div>
+                                </td>
+
+                                <!-- Status: Em progresso -->
+                                <td style='text-align: center; color: #aaa; padding: 0 10px; position: relative;'>
+                                    <div style='position: relative; z-index: 2;'>
+                                        <img src='cid:{imageCidInProgress}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Em progresso</p>
+                                    </div>
+                                </td>
+
+                                <!-- Status: Fechado -->
+                                <td style='text-align: center; color: #aaa; padding: 0 10px; position: relative;'>
+                                    <div style='position: relative; z-index: 2;'>
+                                        <img src='cid:{imageCidClosed}' alt='Status Image' style='display: inline; width: 50px;' />
+                                        <p style='margin-top: 5px;'>Fechado</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <hr style='border: 0; border-top: 1px solid #ddd; margin: 30px 0;' />
+                    <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
+                    <p style='font-size: 12px; color: #aaa; text-align: center;'>Este é um e-mail automático. Por favor, não responda diretamente.</p>
+                </div>
             </body>
         </html>";
+
+        var imageMimeParts = new List<MimePart>
+        {
+            new MimePart("image", "png")
+            {
+                Content = new MimeContent(new MemoryStream(imageBytesOnHold)),
+                ContentId = imageCidOnHold,
+                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                ContentTransferEncoding = ContentEncoding.Base64
+            },
+            new MimePart("image", "png")
+            {
+                Content = new MimeContent(new MemoryStream(imageBytesOpen)),
+                ContentId = imageCidOpen,
+                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                ContentTransferEncoding = ContentEncoding.Base64
+            },
+            new MimePart("image", "png")
+            {
+                Content = new MimeContent(new MemoryStream(imageBytesInProgress)),
+                ContentId = imageCidInProgress,
+                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                ContentTransferEncoding = ContentEncoding.Base64
+            },
+            new MimePart("image", "png")
+            {
+                Content = new MimeContent(new MemoryStream(imageBytesClosed)),
+                ContentId = imageCidClosed,
+                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                ContentTransferEncoding = ContentEncoding.Base64
+            }
+        };
 
         await _emailSenderService.SendEmailResponseAsync(
             ticket.Email,
             $"{ticket.Subject}",
             emailContent,
             ticket.EmailMessageId!,
-            emailAttachments
+            emailAttachments,
+            imageMimeParts
         );
 
         return true;
@@ -803,9 +974,6 @@ public class TicketService
 
             emailContent.AppendLine($"<p><a href=\"{ratingUrl}\" style='color: #0056b3; text-decoration: none; font-weight: bold;'>Clique aqui para nos avaliar</a></p>");
             emailContent.AppendLine("<p>Agradecemos pela sua colaboração e ficamos à disposição para ajudá-lo sempre que precisar.</p>");
-
-            emailContent.AppendLine("<hr style='border: 0; border-top: 1px solid #eee;' />");
-            emailContent.AppendLine("<p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>");
 
             return emailContent.ToString();
         }

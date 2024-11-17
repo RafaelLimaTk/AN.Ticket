@@ -30,8 +30,12 @@ public class HomeController : Controller
     {
         var userId = await GetCurrentUserId();
 
-        DateTime filterStartDate = startDate ?? DateTime.Now;
-        DateTime filterEndDate = endDate ?? filterStartDate.AddDays(7);
+        DateTime today = DateTime.Now.Date;
+        DateTime startOfWeek = today.AddDays(-(int)today.DayOfWeek + (int)DayOfWeek.Monday);
+        DateTime endOfWeek = startOfWeek.AddDays(6);
+
+        DateTime filterStartDate = startDate ?? startOfWeek;
+        DateTime filterEndDate = endDate ?? endOfWeek;
 
         ViewBag.SelectedStartDate = filterStartDate;
         ViewBag.SelectedEndDate = filterEndDate;
@@ -41,7 +45,6 @@ public class HomeController : Controller
 
         return View(homeData);
     }
-
 
     public IActionResult Privacy()
     {

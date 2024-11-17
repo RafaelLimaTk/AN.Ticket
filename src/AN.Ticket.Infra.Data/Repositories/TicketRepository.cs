@@ -126,7 +126,8 @@ public class TicketRepository
             .AsNoTracking()
             .Where(t =>
                 t.Status == TicketStatus.Onhold ||
-                t.Status == TicketStatus.Open
+                t.Status == TicketStatus.Open ||
+                t.Status == TicketStatus.InProgress
             )
             .GroupBy(t => t.UserId)
             .Select(g => new TicketCountUserDto

@@ -3,7 +3,7 @@
         $(".nav-link").removeClass("active");
         $(this).addClass("active");
 
-        $("#conversa-content, #resolucao-content, #anexo-content, #atividade-content, #aprovacao-content").hide();
+        $("#conversa-content, #resolucao-content, #anexo-content, #atividade-content, #aprovacao-content, #ativos-content").hide();
 
         var tabId = $(this).attr("id");
         if (tabId === "tab1") {
@@ -16,6 +16,8 @@
             $("#atividade-content").show();
         } else if (tabId === "tab5") {
             $("#aprovacao-content").show();
+        } else if (tabId === "tab6") {
+            $("#ativos-content").show();
         }
     });
 

@@ -45,13 +45,13 @@ public class ContactController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateContact(ContactCreateViewModel model)
     {
-        if (model.Contact.PaymentPlanId == Guid.Empty)
-        {
-            TempData["ErrorMessage"] = "Selecione um plano de pagamento";
-            var paymentPlans = await _paymantPlanService.GetAllAsync();
-            model.PaymentPlans = paymentPlans.ToList();
-            return View(model);
-        }
+        //if (model.Contact.PaymentPlanId == Guid.Empty)
+        //{
+        //    TempData["ErrorMessage"] = "Selecione um plano de pagamento";
+        //    var paymentPlans = await _paymantPlanService.GetAllAsync();
+        //    model.PaymentPlans = paymentPlans.ToList();
+        //    return View(model);
+        //}
 
         if (!ModelState.IsValid)
         {
@@ -127,8 +127,7 @@ public class ContactController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
+    [HttpGet]
     public async Task<IActionResult> DeleteContact(Guid id)
     {
         if (id == Guid.Empty)

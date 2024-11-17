@@ -1,4 +1,5 @@
 ﻿using AN.Ticket.Application.DTOs.Activity;
+using AN.Ticket.Application.DTOs.Asset;
 using AN.Ticket.Application.DTOs.Attachment;
 using AN.Ticket.Application.DTOs.InteractionHistory;
 using AN.Ticket.Application.DTOs.SatisfactionRating;
@@ -30,5 +31,6 @@ public class TicketDto
     public SatisfactionRatingDto SatisfactionRating { get; set; }
     public string? Classification { get; set; }
     public ICollection<AttachmentDto> Attachments { get; set; }
+    public ICollection<AssetDto> Assets { get; set; }
     public string? Resolution { get; set; }
 }

@@ -149,7 +149,7 @@ public class ActivityController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Delete(Guid id, bool isTicketEdit = false)
+    public async Task<IActionResult> Delete(Guid id, Guid? ticketId, bool isTicketEdit = false)
     {
         try
         {
@@ -161,9 +161,9 @@ public class ActivityController : Controller
             TempData["ErrorMessage"] = ex.Message;
         }
 
-        if (isTicketEdit)
+        if (isTicketEdit || ticketId.HasValue)
         {
-            return RedirectToAction("Details", "Ticket", new { id });
+            return RedirectToAction("Details", "Ticket", new { id = ticketId });
         }
 
         return RedirectToAction(nameof(Index));

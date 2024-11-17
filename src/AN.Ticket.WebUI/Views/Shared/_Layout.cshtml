@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AN.Ticket.WebUI.styles.css" asp-append-version="true" />
+    <link rel="icon" href="~/img/icon.svg" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
     @* Implementação do DataTable *@
@@ -28,11 +29,15 @@
                 </button>
                 @if (User.IsInRole("Admin"))
                 {
-                    <a class="navbar-brand" asp-area="" asp-controller="Admin" asp-action="Index">Atlas Network</a>
+                    <a class="navbar-brand" asp-area="" asp-controller="Admin" asp-action="Index">
+                        <img src="~/img/Atlas Chamados (375 x 75 px).png" alt="Logo" style="width: 250px; height: 45px; object-fit: cover">
+                    </a>
                 }
                 else
                 {
-                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Atlas Network</a>
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                        <img src="~/img/Atlas Chamados (375 x 75 px).png" alt="Logo" style="width: 250px; height: 45px; object-fit: cover">
+                    </a>
                 }
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,8 +69,8 @@
     <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
         <div class="offcanvas-header">
             <div class="offcanvas-title" id="offcanvasSidebarLabel">
-                @* <img src="" alt="Logo">
-                *@ Atlas Network
+                <img src="~/img/Atlas Chamados (375 x 75 px).png" alt="Logo" style="width: 250px; height: 45px; object-fit: cover">
+                @* Atlas Network *@
             </div>
             <button type="button" class="offcanvas-close-btn" data-bs-dismiss="offcanvas" aria-label="Close">
                 <i class="bi bi-x-lg"></i>
@@ -75,6 +80,23 @@
             <ul class="navbar-nav">
                 @if (User.IsInRole("Admin"))
                 {
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
+                           data-bs-target="#supportHomeMenu" aria-expanded="false" aria-controls="supportHomeMenu">
+                            <i class="bi bi-house"></i>
+                            <span class="ms-2">Home</span>
+                            <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse" id="supportHomeMenu">
+                            <ul class="navbar-nav ps-3">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Admin" asp-action="Index">
+                                        <i class="bi bi-house"></i> Overview
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse"
                            data-bs-target="#appFeaturesCustomer" aria-expanded="false" aria-controls="appFeaturesCustomer">

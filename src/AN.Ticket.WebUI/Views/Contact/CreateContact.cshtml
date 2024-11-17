@@ -19,7 +19,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <form asp-controller="Contact" asp-action="@(Model.IsEditedContact ? "EditContact" : "CreateContact")"
                 method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -79,7 +79,7 @@
             </form>
         </div>
 
-        <div class="col-md-6">
+@*         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
                     Selecione um Plano de Pagamento
@@ -113,7 +113,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> *@
     </div>
 </div>
 

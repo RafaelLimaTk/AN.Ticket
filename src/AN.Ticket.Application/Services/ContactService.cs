@@ -81,20 +81,20 @@ public class ContactService
 
         await _contactRepository.SaveAsync(contact);
 
-        var planPrice = await _paymentPlanRepository.GetByIdAsync(contactCreateDto.PaymentPlanId);
-        var payments = new List<Payment>();
-        for (int i = 0; i < 12; i++)
-        {
-            payments.Add(new Payment(
-                contact.Id,
-                planPrice.Value,
-                DateTime.Now.AddMonths(i),
-                planPrice.Id
-            ));
-        }
+        //var planPrice = await _paymentPlanRepository.GetByIdAsync(contactCreateDto.PaymentPlanId);
+        //var payments = new List<Payment>();
+        //for (int i = 0; i < 12; i++)
+        //{
+        //    payments.Add(new Payment(
+        //        contact.Id,
+        //        planPrice.Value,
+        //        DateTime.Now.AddMonths(i),
+        //        planPrice.Id
+        //    ));
+        //}
 
-        foreach (var payment in payments)
-            await _paymentRepository.SaveAsync(payment);
+        //foreach (var payment in payments)
+        //    await _paymentRepository.SaveAsync(payment);
 
         await _unitOfWork.CommitAsync();
 
@@ -186,29 +186,29 @@ public class ContactService
 
         var contactIds = new List<Guid> { contact.Id };
 
-        var payments = await _paymentRepository.GetByContacts(contactIds);
-        var existingPaymentPlanId = payments.FirstOrDefault()?.PaymentPlanId;
+        //var payments = await _paymentRepository.GetByContacts(contactIds);
+        //var existingPaymentPlanId = payments.FirstOrDefault()?.PaymentPlanId;
 
-        if (existingPaymentPlanId != contactCreateDto.PaymentPlanId)
-        {
-            foreach (var payment in payments)
-                _paymentRepository.Delete(payment);
+        //if (existingPaymentPlanId != contactCreateDto.PaymentPlanId)
+        //{
+        //    foreach (var payment in payments)
+        //        _paymentRepository.Delete(payment);
 
-            var planPrice = await _paymentPlanRepository.GetByIdAsync(contactCreateDto.PaymentPlanId);
-            var newPayments = new List<Payment>();
-            for (int i = 0; i < 12; i++)
-            {
-                newPayments.Add(new Payment(
-                    contact.Id,
-                    planPrice.Value,
-                    DateTime.Now.AddMonths(i),
-                    planPrice.Id
-                ));
-            }
+        //    var planPrice = await _paymentPlanRepository.GetByIdAsync(contactCreateDto.PaymentPlanId);
+        //    var newPayments = new List<Payment>();
+        //    for (int i = 0; i < 12; i++)
+        //    {
+        //        newPayments.Add(new Payment(
+        //            contact.Id,
+        //            planPrice.Value,
+        //            DateTime.Now.AddMonths(i),
+        //            planPrice.Id
+        //        ));
+        //    }
 
-            foreach (var payment in newPayments)
-                await _paymentRepository.SaveAsync(payment);
-        }
+        //    foreach (var payment in newPayments)
+        //        await _paymentRepository.SaveAsync(payment);
+        //}
 
         _contactRepository.Update(contact);
         await _unitOfWork.CommitAsync();

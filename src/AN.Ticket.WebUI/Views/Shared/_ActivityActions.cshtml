@@ -20,7 +20,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <a asp-controller="Activity" asp-action="Delete" asp-route-id="@Model.Id" asp-route-isTicketEdit="@Model.IsEditTicket" class="btn btn-danger">Excluir</a>
+                <a asp-controller="Activity" asp-action="Delete" asp-route-id="@Model.Id" asp-route-isTicketEdit="@Model.IsEditTicket" asp-route-ticketId="@Model.TicketId" as class="btn btn-danger">Excluir</a>
             </div>
         </div>
     </div>

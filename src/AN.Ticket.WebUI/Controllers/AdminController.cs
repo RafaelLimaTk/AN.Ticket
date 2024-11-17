@@ -62,7 +62,7 @@ public class AdminController : Controller
         var ticketMetrics = await _adminService.GetTicketMetricsAsync();
 
         var users = await _userService.GetAllUsersAsync();
-        ViewBag.UserAssigned = users;
+        ViewBag.UserAssigned = users.Where(x => x.Role != UserRole.Admin);
 
         var currentUser = await _userManager.GetUserAsync(User);
         string firstName = "Convidado";

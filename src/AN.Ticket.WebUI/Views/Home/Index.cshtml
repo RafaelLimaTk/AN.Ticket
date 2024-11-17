@@ -79,7 +79,7 @@
                 <h5 id="ticketsTitle">@((bool)showInProgress ? "Os Tickets em andamento" : "Todos os tickets")</h5>
                 <label class="form-switch">
                     <input type="checkbox" id="showInProgress" class="form-check-input"
-                    @(ViewBag.ShowInProgress ? "checked" : "") onchange="filterByDate()" />
+                    @(ViewBag.ShowInProgress ? "checked" : "") />
                     <span class="form-check-label">Progresso</span>
                 </label>
                 <canvas id="progressChart"></canvas>
@@ -330,6 +330,12 @@
                 }
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('showInProgress').addEventListener('change', function () {
+                filterByDate();
+            });
+        });
     </script>
 }
 

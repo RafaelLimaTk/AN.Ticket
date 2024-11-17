@@ -8,4 +8,5 @@ public interface IAssetAssignmentRepository
 {
     Task<Guid> GetAssignmentUserIdAsync(Guid assetId);
     Task<AssetAssignment> GetByIdOrNullAsync(Guid assetId);
+    Task<IEnumerable<AssetAssignment>> GetByContactIdAsync(Guid contactId);
 }
