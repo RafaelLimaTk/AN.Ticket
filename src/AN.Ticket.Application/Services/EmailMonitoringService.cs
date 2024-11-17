@@ -184,6 +184,7 @@ public class EmailMonitoringService : IEmailMonitoringService
                 //    await AddMessagesToTicket(ticket, newMessages);
                 //}
 
+                await _unitOfWork.CommitAsync();
                 return;
             }
 
@@ -237,54 +238,61 @@ public class EmailMonitoringService : IEmailMonitoringService
 
     private async Task HandleAttachmentsAndAddMessages(DomainEntity.Ticket ticket, List<TicketMessage> messages, List<EmailAttachment> attachments)
     {
-        if (messages != null && messages.Count > 0)
+        try
         {
-            int messageCount = messages.Count;
-
-            for (int i = 0; i < attachments.Count; i++)
+            if (messages != null && messages.Count > 0)
             {
-                var messageIndex = i % messageCount;
-                var message = messages[messageIndex];
+                int messageCount = messages.Count;
 
-                var ticketAttachment = new DomainEntity.Attachment(
-                    attachments[i].FileName,
-                    attachments[i].Content,
-                    attachments[i].ContentType,
-                    ticket.Id,
-                    message.Id
-                );
+                for (int i = 0; i < attachments.Count; i++)
+                {
+                    var messageIndex = i % messageCount;
+                    var message = messages[messageIndex];
 
-                ticket.AddAttachment(ticketAttachment);
-                await _attachmentRepository.SaveAsync(ticketAttachment);
+                    var ticketAttachment = new DomainEntity.Attachment(
+                        attachments[i].FileName,
+                        attachments[i].Content,
+                        attachments[i].ContentType,
+                        ticket.Id,
+                        message.Id
+                    );
+
+                    ticket.AddAttachment(ticketAttachment);
+                    await _ticketMessageRepository.SaveRangeAsync(messages);
+                    await _attachmentRepository.SaveAsync(ticketAttachment);
+                }
+            }
+            else
+            {
+                var defaultMessage = new TicketMessage("Anexo recebido sem mensagem.", DateTime.UtcNow);
+                defaultMessage.TicketId = ticket.Id;
+
+                if (attachments.Any())
+                {
+                    await _ticketMessageRepository.SaveAsync(defaultMessage);
+                    ticket.AddMessages(new List<TicketMessage> { defaultMessage });
+                }
+
+                foreach (var attachment in attachments)
+                {
+                    var ticketAttachment = new DomainEntity.Attachment(
+                        attachment.FileName,
+                        attachment.Content,
+                        attachment.ContentType,
+                        ticket.Id,
+                        defaultMessage.Id
+                    );
+
+                    ticket.AddAttachment(ticketAttachment);
+                    await _attachmentRepository.SaveAsync(ticketAttachment);
+                }
             }
         }
-        else
+        catch (Exception ex)
         {
-            var defaultMessage = new TicketMessage("Anexo recebido sem mensagem.", DateTime.UtcNow);
-            defaultMessage.TicketId = ticket.Id;
-
-            if (attachments.Any())
-            {
-                await _ticketMessageRepository.SaveAsync(defaultMessage);
-                ticket.AddMessages(new List<TicketMessage> { defaultMessage });
-            }
-
-            foreach (var attachment in attachments)
-            {
-                var ticketAttachment = new DomainEntity.Attachment(
-                    attachment.FileName,
-                    attachment.Content,
-                    attachment.ContentType,
-                    ticket.Id,
-                    defaultMessage.Id
-                );
-
-                ticket.AddAttachment(ticketAttachment);
-                await _attachmentRepository.SaveAsync(ticketAttachment);
-            }
+            _logger.LogError(ex.Message, "Erro ao criar o arquivo");
+            throw;
         }
-
-        await _unitOfWork.CommitAsync();
     }
 
     private List<EmailAttachment> GetAttachmentsFromEmail(MimeMessage emailMessage)
