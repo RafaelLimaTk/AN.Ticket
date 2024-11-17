@@ -315,7 +315,7 @@ public class TicketController : Controller
         if (!ModelState.IsValid)
         {
             TempData["ErrorMessage"] = "Erro ao editar o ticket.";
-            return View(model);
+            return View(nameof(Edit), model);
         }
 
         try
