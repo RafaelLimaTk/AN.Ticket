@@ -80,7 +80,7 @@ public class EmailSenderService : IEmailSenderService
         {
             foreach (var mimePart in embeddedImages)
             {
-                bodyBuilder.LinkedResources.Add(mimePart); // Incorpora as imagens
+                bodyBuilder.LinkedResources.Add(mimePart); 
             }
         }
 

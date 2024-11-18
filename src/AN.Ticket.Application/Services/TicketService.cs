@@ -236,7 +236,6 @@ public class TicketService
             <html>
                 <body>
                     <div style='max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f9f9f9;'>
-                        <img src='cid:{imageCidHeader}' alt='Logo da Atlas Network' style='width: 100%; max-width: 100%; height: auto; display: block; margin: auto;' />
                         <h2 style='color: #0056b3; text-align: center;'>Suporte ao Cliente</h2>
                         <h3>Olá {ticket.ContactName}</h3>
                         <p>Recebemos seu contato e um <strong>chamado de suporte</strong> foi aberto com sucesso!</p> 
@@ -268,10 +267,7 @@ public class TicketService
                     </div>
                 </body>
             </html>";
-        Console.WriteLine("Conteudo html" + htmlContent);
         var imageMimeParts = images;
-        imageMimeParts.Add(imageHeaderMimepart);
-
 
         await _emailSenderService.SendEmailAsync(
             ticket.Email,
