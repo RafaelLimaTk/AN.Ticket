@@ -136,4 +136,10 @@ public class AdminController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
+
+    [HttpGet]
+    public IActionResult Dashboard()
+    {
+        return View();
+    }
 }
