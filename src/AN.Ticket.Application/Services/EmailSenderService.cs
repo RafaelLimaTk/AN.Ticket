@@ -54,7 +54,7 @@ public class EmailSenderService : IEmailSenderService
         await client.DisconnectAsync(true);
     }
 
-    public async Task SendEmailResponseAsync(string email, string subject, string message, string originalMessageId, List<EmailAttachment>? attachments = null)
+    public async Task SendEmailResponseAsync(string email, string subject, string message, string originalMessageId, List<MimePart>? embeddedImages = null, List<EmailAttachment>? attachments = null)
     {
         var senderName = email;
         var senderAddress = _smtpSettings.Username;
@@ -76,9 +76,17 @@ public class EmailSenderService : IEmailSenderService
             }
         }
 
+        if (embeddedImages != null && embeddedImages.Any())
+        {
+            foreach (var mimePart in embeddedImages)
+            {
+                bodyBuilder.LinkedResources.Add(mimePart); // Incorpora as imagens
+            }
+        }
+
         emailMessage.Body = bodyBuilder.ToMessageBody();
 
-        if (originalMessageId is not null)
+        if (originalMessageId != null)
         {
             emailMessage.InReplyTo = originalMessageId;
             emailMessage.References.Add(originalMessageId);
@@ -90,4 +98,5 @@ public class EmailSenderService : IEmailSenderService
         await client.SendAsync(emailMessage);
         await client.DisconnectAsync(true);
     }
+
 }

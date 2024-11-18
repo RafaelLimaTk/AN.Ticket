@@ -77,6 +77,68 @@ public class TicketService
             }
         }
     }
+    public async Task<(string ticketStatusContent, List<MimePart>? images)> TicketStatusInHtml(DomainEntity.Ticket ticket)
+    {
+        // Mapear status para imagens
+        var statusImages = new Dictionary<TicketStatus, string>
+        {
+            { TicketStatus.Onhold, ticket.Status == TicketStatus.Onhold ? "/img/status/onhold-on.png" : "/img/status/onhold-off.png" },
+            { TicketStatus.Open, ticket.Status == TicketStatus.Open ? "/img/status/open-on.png" : "/img/status/open-off.png" },
+            { TicketStatus.InProgress, ticket.Status == TicketStatus.InProgress ? "/img/status/progress-on.png" : "/img/status/progress-off.png" },
+            { TicketStatus.Closed, ticket.Status == TicketStatus.Closed ? "/img/status/close-on.png" : "/img/status/close-off.png" }
+        };
+        var statusTranslations = new Dictionary<TicketStatus, string>
+            {
+                { TicketStatus.Onhold, "Em espera" },
+                { TicketStatus.Open, "Aberto" },
+                { TicketStatus.InProgress, "Em progresso" },
+                { TicketStatus.Closed, "Fechado" }
+            };
+
+        // Carregar bytes das imagens e gerar CIDs
+        var images = new List<MimePart>();
+        string ticketStatusContent = "<div style='margin-top: 20px; text-align: center;'>"
+            + "<table style='width: 100%; text-align: center; background-color: #f9f9f9; border-spacing: 0;'>"
+            + "<tr>";
+
+        int count = 0;
+        foreach (var status in statusImages.Keys)
+        {
+            string imagePath = statusImages[status];
+            var imageBytes = await GetImageBytesAsync(imagePath);
+            var imageCid = MimeUtils.GenerateMessageId();
+
+            images.Add(new MimePart("image", "png")
+            {
+                Content = new MimeContent(new MemoryStream(imageBytes)),
+                ContentId = imageCid,
+                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+                ContentTransferEncoding = ContentEncoding.Base64
+            });
+
+            string color = ticket.Status == status ? "#0056b3" : "#aaa";
+            ticketStatusContent += $@"
+            <td style='padding: 0 5px;'>
+                <img src='cid:{imageCid}' alt='Status Image' style='display: block; margin: auto; width: 40px;' />
+                <p style='margin-top: 5px; color:{color};'>{statusTranslations[status]}</p>
+            </td>";
+
+            // Adicionar separador de pontos entre os blocos, exceto no último
+            if (++count < statusImages.Count)
+            {
+                ticketStatusContent += @"
+            <td style='width: 5%; text-align: center;'>
+                <span style='display: block; height: 2px; width: 30px; margin: auto; 
+                             border-top: 4px dotted #ccc;'></span>
+            </td>";
+            }
+        }
+
+        ticketStatusContent += "</tr></table></div>";
+
+        return (ticketStatusContent, images);
+    }
+
     public async Task<bool> CreateTicketAsync(CreateTicketDto createTicket)
     {
         var ticket = new DomainEntity.Ticket(
@@ -133,6 +195,7 @@ public class TicketService
 
         await _ticketRepository.SaveAsync(ticket);
         await _unitOfWork.CommitAsync();
+        var imageCidHeader = MimeUtils.GenerateMessageId();
 
         var code = await _ticketRepository.GetTicketCodeByIdAsync(ticket.Id);
 
@@ -158,32 +221,22 @@ public class TicketService
         //        </body>
         //    </html>"
         //);
-        string imagePathOnHold = ticket.Status == TicketStatus.Onhold ? "/img/status/onhold-on.png" : "/img/status/onhold-off.png";
-        string imagePathOpen = ticket.Status == TicketStatus.Open ? "/img/status/open-on.png" : "/img/status/open-off.png";
-        string imagePathInProgress = ticket.Status == TicketStatus.InProgress ? "/img/status/progress-on.png" : "/img/status/progress-off.png";
-        string imagePathClosed = ticket.Status == TicketStatus.Closed ? "/img/status/close-on.png" : "/img/status/close-off.png";
         string imagePathHeader = "/img/logo/cabecalho.png";
-
-
-        var imageBytesOnHold = await GetImageBytesAsync(imagePathOnHold);
-        var imageBytesOpen = await GetImageBytesAsync(imagePathOpen);
-        var imageBytesInProgress = await GetImageBytesAsync(imagePathInProgress);
-        var imageBytesClosed = await GetImageBytesAsync(imagePathClosed);
         var imageBytesHeader = await GetImageBytesAsync(imagePathHeader);
-
-
-  
-        var imageCidOnHold = MimeUtils.GenerateMessageId();
-        var imageCidOpen = MimeUtils.GenerateMessageId();
-        var imageCidInProgress = MimeUtils.GenerateMessageId();
-        var imageCidClosed = MimeUtils.GenerateMessageId();
-        var imageCidHeader = MimeUtils.GenerateMessageId();
+        var imageHeaderMimepart = new MimePart("image", "png")
+        {
+            Content = new MimeContent(new MemoryStream(imageBytesHeader)),
+            ContentId = imageCidHeader,
+            ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
+            ContentTransferEncoding = ContentEncoding.Base64
+        };
+        var (ticketStatusContent, images) = await TicketStatusInHtml(ticket);
 
         string htmlContent = $@"
             <html>
                 <body>
                     <div style='max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f9f9f9;'>
-                     <img src='cid:{imageCidHeader}' alt='imagem cabeçalho';' />
+                        <img src='cid:{imageCidHeader}' alt='Logo da Atlas Network' style='width: 100%; max-width: 100%; height: auto; display: block; margin: auto;' />
                         <h2 style='color: #0056b3; text-align: center;'>Suporte ao Cliente</h2>
                         <h3>Olá {ticket.ContactName}</h3>
                         <p>Recebemos seu contato e um <strong>chamado de suporte</strong> foi aberto com sucesso!</p> 
@@ -204,51 +257,8 @@ public class TicketService
                             <li><strong>WhatsApp:</strong> (11) 98765-4321</li>
                             <li><strong>Horário de Atendimento:</strong> Segunda a Sexta, das 8h às 18h</li>
                         </ul>
-                       <div style='margin-top: 20px; position: relative; text-align: center;'>
-                            <!-- Linha tracejada -->
-                            
-                            <!-- Tabela para alinhar os ícones e textos -->
-                            <table style='width: 100%; z-index: 1; position: relative; background-color: #f9f9f9;'>
-                                <tr>
-                                    <!-- Status: Em espera -->
-                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.Onhold ? "#0056b3" : "#aaa")} padding: 0 5px;'>
-                                        <img src='cid:{imageCidOnHold}' alt='Status Image' style='display: inline; width: 50px;' />
-                                        <p style='margin-top: 5px; color:{(ticket.Status == TicketStatus.Onhold ? "#0056b3" : "#aaa")}'>Em espera</p>
-                                    </td>
-
-                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.Open ? "#0056b3" : "#aaa")} padding: 0 5px;'>
-                                        <p style='margin-top: 5px; font-size: 50px;  font-family:comic sans'>.....</p>
-                                    </td>
-
-                                    <!-- Status: Aberto -->
-                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.Open ? "#0056b3" : "#aaa")} padding: 0 5px;'>
-                                        <img src='cid:{imageCidOpen}' alt='Status Image' style='display: inline; width: 50px;' />
-                                        <p style='margin-top: 5px; color:{(ticket.Status == TicketStatus.Open ? "#0056b3" : "#aaa")}'>Aberto</p>
-                                    </td>
-
-                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.InProgress ? "#0056b3" : "#aaa")} padding: 0 5px;'>
-                                        <p style='margin-top: 5px; font-size: 50px;   font-family:comic sans'>.....</p>
-                                    </td>
-
-                                    <!-- Status: Em progresso -->
-                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.InProgress ? "#0056b3" : "#aaa")} padding: 0 5px;'>
-                                        <img src='cid:{imageCidInProgress}' alt='Status Image' style='display: inline; width: 50px;' />
-                                        <p style='margin-top: 5px; {(ticket.Status == TicketStatus.InProgress ? "#0056b3" : "#aaa")}'>Em progresso</p>
-                                    </td>
-
-                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.Closed ? "#0056b3" : "#aaa")} padding: 0 5px;'>
-                                        <p style='margin-top: 5px; font-size: 50px; font-family:comic sans'>.....</p>
-                                    </td>
-
-                                    <!-- Status: Fechado -->
-                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.Closed ? "#0056b3" : "#aaa")} padding: 0 5px;'>
-                                        <img src='cid:{imageCidClosed}' alt='Status Image' style='display: inline; width: 50px;' />
-                                        <p style='margin-top: 5px; {(ticket.Status == TicketStatus.Closed ? "#0056b3" : "#aaa")}'>Fechado</p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-
+                       
+                        {ticketStatusContent}
 
                         <p style='font-size: 14px; color: #777;'>Atenciosamente,<br>Equipe de Suporte - AtlasNetworks</p>
 
@@ -258,44 +268,11 @@ public class TicketService
                     </div>
                 </body>
             </html>";
-        var imageMimeParts = new List<MimePart>
-        {
-            new MimePart("image", "png")
-            {
-                Content = new MimeContent(new MemoryStream(imageBytesOnHold)),
-                ContentId = imageCidOnHold,
-                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
-                ContentTransferEncoding = ContentEncoding.Base64
-            },
-            new MimePart("image", "png")
-            {
-                Content = new MimeContent(new MemoryStream(imageBytesOpen)),
-                ContentId = imageCidOpen,
-                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
-                ContentTransferEncoding = ContentEncoding.Base64
-            },
-            new MimePart("image", "png")
-            {
-                Content = new MimeContent(new MemoryStream(imageBytesInProgress)),
-                ContentId = imageCidInProgress,
-                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
-                ContentTransferEncoding = ContentEncoding.Base64
-            },
-            new MimePart("image", "png")
-            {
-                Content = new MimeContent(new MemoryStream(imageBytesClosed)),
-                ContentId = imageCidClosed,
-                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
-                ContentTransferEncoding = ContentEncoding.Base64
-            },
-             new MimePart("image", "png")
-            {
-                Content = new MimeContent(new MemoryStream(imageBytesHeader)),
-                ContentId = imageCidHeader,
-                ContentDisposition = new ContentDisposition(ContentDisposition.Inline),
-                ContentTransferEncoding = ContentEncoding.Base64
-            }
-        };
+        Console.WriteLine("Conteudo html" + htmlContent);
+        var imageMimeParts = images;
+        imageMimeParts.Add(imageHeaderMimepart);
+
+
         await _emailSenderService.SendEmailAsync(
             ticket.Email,
             ticket.Subject,
@@ -411,6 +388,8 @@ public class TicketService
         _ticketRepository.Update(ticket);
 
         await _unitOfWork.CommitAsync();
+        
+        var (ticketStatusContent, images) = await TicketStatusInHtml(ticket);
 
         if (ticketResolutionDto.NotifyContact)
         {
@@ -421,6 +400,7 @@ public class TicketService
                     <p>O ticket com o código {ticket.TicketCode} foi fechado.</p>
                     <p>Assunto: {ticket.Subject}</p>
                     <p>Data de Fechamento: {ticket.ClosedAt?.ToString("dd/MM/yyyy HH:mm:ss")}</p>
+                    {ticketStatusContent}
                     <p>Obrigado por utilizar nossos serviços.</p>";
 
             bool existsSatisfactionRating = await _satisfactionRatingRepository.ExistsByTicketIdAsync(ticket.Id);
@@ -443,7 +423,8 @@ public class TicketService
                 ticket.Email,
                 "Ticket Resolvido",
                 emailContent,
-                ticket.EmailMessageId!
+                ticket.EmailMessageId!,
+                images
             );
         }
 
@@ -493,6 +474,7 @@ public class TicketService
         await _ticketMessageRepository.SaveAsync(ticketMessage);
         _ticketRepository.Update(ticket);
         await _unitOfWork.CommitAsync();
+        var (ticketStatusContent, images) = await TicketStatusInHtml(ticket);
 
         string emailContent = $@"
         <html>
@@ -502,6 +484,7 @@ public class TicketService
                 <p>Você recebeu uma nova resposta ao seu ticket:</p>
                 <p>#{ticket.TicketCode}</p>
                 <p><strong>Mensagem:</strong> {messageText}</p>
+                {ticketStatusContent}
                 <p>Se precisar de mais assistência, por favor, responda a este e-mail.</p>
                 <p>Obrigado por utilizar nossos serviços!</p>";
 
@@ -525,6 +508,7 @@ public class TicketService
             $"{ticket.Subject}",
             emailContent,
             ticket.EmailMessageId!,
+            images,
             emailAttachments
         );
 
