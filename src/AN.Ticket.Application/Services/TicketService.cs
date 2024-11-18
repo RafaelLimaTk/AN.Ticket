@@ -211,39 +211,39 @@ public class TicketService
                             <table style='width: 100%; z-index: 1; position: relative; background-color: #f9f9f9;'>
                                 <tr>
                                     <!-- Status: Em espera -->
-                                    <td style='text-align: center; color: #aaa; padding: 0 5px;'>
+                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.Onhold ? "#0056b3" : "#aaa")} padding: 0 5px;'>
                                         <img src='cid:{imageCidOnHold}' alt='Status Image' style='display: inline; width: 50px;' />
-                                        <p style='margin-top: 5px;'>Em espera</p>
+                                        <p style='margin-top: 5px; color:{(ticket.Status == TicketStatus.Onhold ? "#0056b3" : "#aaa")}'>Em espera</p>
                                     </td>
 
-                                    <td style='text-align: center; color: #aaa; padding: 0 5px;'>
-                                        <p style='margin-top: 5px; font-size: 50px; font-family:comic sans'>.....</p>
+                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.Open ? "#0056b3" : "#aaa")} padding: 0 5px;'>
+                                        <p style='margin-top: 5px; font-size: 50px;  font-family:comic sans'>.....</p>
                                     </td>
 
                                     <!-- Status: Aberto -->
-                                    <td style='text-align: center; color: #aaa; padding: 0 5px;'>
+                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.Open ? "#0056b3" : "#aaa")} padding: 0 5px;'>
                                         <img src='cid:{imageCidOpen}' alt='Status Image' style='display: inline; width: 50px;' />
-                                        <p style='margin-top: 5px;'>Aberto</p>
+                                        <p style='margin-top: 5px; color:{(ticket.Status == TicketStatus.Open ? "#0056b3" : "#aaa")}'>Aberto</p>
                                     </td>
 
-                                    <td style='text-align: center; color: #aaa; padding: 0 5px;'>
-                                        <p style='margin-top: 5px; font-size: 50px; font-family:comic sans'>.....</p>
+                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.InProgress ? "#0056b3" : "#aaa")} padding: 0 5px;'>
+                                        <p style='margin-top: 5px; font-size: 50px;   font-family:comic sans'>.....</p>
                                     </td>
 
                                     <!-- Status: Em progresso -->
-                                    <td style='text-align: center; color: #aaa; padding: 0 5px;'>
+                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.InProgress ? "#0056b3" : "#aaa")} padding: 0 5px;'>
                                         <img src='cid:{imageCidInProgress}' alt='Status Image' style='display: inline; width: 50px;' />
-                                        <p style='margin-top: 5px;'>Em progresso</p>
+                                        <p style='margin-top: 5px; {(ticket.Status == TicketStatus.InProgress ? "#0056b3" : "#aaa")}'>Em progresso</p>
                                     </td>
 
-                                    <td style='text-align: center; color: #aaa; padding: 0 5px;'>
+                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.Closed ? "#0056b3" : "#aaa")} padding: 0 5px;'>
                                         <p style='margin-top: 5px; font-size: 50px; font-family:comic sans'>.....</p>
                                     </td>
 
                                     <!-- Status: Fechado -->
-                                    <td style='text-align: center; color: #aaa; padding: 0 5px;'>
+                                    <td style='text-align: center; color:{(ticket.Status == TicketStatus.Closed ? "#0056b3" : "#aaa")} padding: 0 5px;'>
                                         <img src='cid:{imageCidClosed}' alt='Status Image' style='display: inline; width: 50px;' />
-                                        <p style='margin-top: 5px;'>Fechado</p>
+                                        <p style='margin-top: 5px; {(ticket.Status == TicketStatus.Closed ? "#0056b3" : "#aaa")}'>Fechado</p>
                                     </td>
                                 </tr>
                             </table>
