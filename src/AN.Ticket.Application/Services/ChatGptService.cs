@@ -56,7 +56,7 @@ public class ChatGptService : IChatGptService
 
                                 > Você  tá chamando duas vezes ?
                                 >
-                                > Em sáb., 14 de set. de 2024 às 23:13, Atlas Network NT <suporte.anatlasnetwork@gmail.com> escreveu:
+                                > Em sáb., 14 de set. de 2024 às 23:13, Spider Tech NT <suporte.anatlasnetwork@gmail.com> escreveu:
                                 >
                                 >> Teste 2
                                 >>
@@ -85,7 +85,7 @@ public class ChatGptService : IChatGptService
                                       ""mensagem"": ""Você tá chamando duas vezes?""
                                     },
                                     {
-                                      ""remetente"": ""Atlas Network NT <suporte.anatlasnetwork@gmail.com>"",
+                                      ""remetente"": ""Spider Tech NT <suporte.anatlasnetwork@gmail.com>"",
                                       ""data"": ""14 de set. de 2024 às 23:13"",
                                       ""mensagem"": ""Teste 2""
                                     },

@@ -160,7 +160,8 @@ public class AccountController : Controller
         {
             return View(model);
         }
-
+        await _seedUserRoleInitial.SeedRolesAsync();
+        await _seedUserRoleInitial.SeedUsersAsync();
         var user = new ApplicationUser(model.FullName, model.Email, model.Email, false, false);
         var userEmployee = new User(Guid.Parse(user.Id), user.FullName!, user.Email!, UserRole.User);
         var result = await _userManager.CreateAsync(user, model.Password);
