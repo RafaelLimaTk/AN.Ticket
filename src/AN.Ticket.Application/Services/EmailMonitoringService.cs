@@ -160,7 +160,7 @@ public class EmailMonitoringService : IEmailMonitoringService
                                     Se precisar de ajuda adicional, você também pode entrar em contato conosco pelos seguintes canais:
                                 </p>
                                 <ul style='list-style-type: none; padding: 0; font-size: 14px; color: #555;'>
-                                    <li><strong>Email:</strong> suporte.anatlasnetwork@gmail.com</li>
+                                    <li><strong>Email:</strong> conectwolrdspidertech@gmail.com</li>
                                     <li><strong>Horário de Atendimento:</strong> Segunda a Sexta, das 8h às 18h</li>
                                 </ul>
                 
@@ -418,7 +418,7 @@ public class EmailMonitoringService : IEmailMonitoringService
                         <h3>Contatos para Suporte:</h3>
                         <p>Você também pode entrar em contato conosco pelos seguintes canais de atendimento:</p>
                         <ul style='list-style-type: none; padding: 0;'>
-                            <li><strong>Email:</strong> suporte.anatlasnetwork@gmail.com</li>
+                            <li><strong>Email:</strong> conectwolrdspidertech@gmail.com</li>
                             <li><strong>Horário de Atendimento:</strong> Segunda a Sexta, das 8h às 18h</li>
                         </ul>
                        <div style='margin-top: 20px; position: relative; text-align: center;'>

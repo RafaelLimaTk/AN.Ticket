@@ -61,7 +61,7 @@ public static class HangfireConfig
         app.UseHangfireDashboard("/hangfire", new DashboardOptions
         {
             Authorization = new[] { new HangfireAuthorizationFilter() },
-            DisplayStorageConnectionString = false
+            DisplayStorageConnectionString = true
         });
     }
 }
